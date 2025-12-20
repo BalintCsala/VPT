@@ -1,0 +1,1128 @@
+{
+  "targets": {
+    "normals": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "translucent_normals": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "material_normal": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "material_specular": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "radiance": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "sky": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "radiance_swap": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "bloom_down_1": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 3960,
+      "height": 1080
+    },
+    "bloom_down_2": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 1980,
+      "height": 540
+    },
+    "bloom_down_3": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 990,
+      "height": 270
+    },
+    "bloom_down_4": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 495,
+      "height": 135
+    },
+    "bloom_down_5": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 248,
+      "height": 68
+    },
+    "bloom_down_6": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 124,
+      "height": 34
+    },
+    "bloom_down_7": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 62,
+      "height": 17
+    },
+    "bloom_down_8": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 31,
+      "height": 9
+    },
+    "bloom_down_9": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 16,
+      "height": 5
+    },
+    "bloom_down_10": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 8,
+      "height": 3
+    },
+    "bloom_down_11": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 4,
+      "height": 2
+    },
+    "bloom_up_10": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 8,
+      "height": 4
+    },
+    "bloom_up_9": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 16,
+      "height": 8
+    },
+    "bloom_up_8": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 32,
+      "height": 16
+    },
+    "bloom_up_7": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 64,
+      "height": 32
+    },
+    "bloom_up_6": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 128,
+      "height": 64
+    },
+    "bloom_up_5": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 256,
+      "height": 128
+    },
+    "bloom_up_4": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 512,
+      "height": 256
+    },
+    "bloom_up_3": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 1024,
+      "height": 512
+    },
+    "bloom_up_2": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 2048,
+      "height": 1024
+    },
+    "bloom_up_1": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 4096,
+      "height": 2048
+    },
+    "bloom_up_0": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 8192,
+      "height": 4096
+    },
+    "final": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "result": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "passes": [
+    {
+      "vertex_shader": "minecraft:post/initial_ray/initial_ray",
+      "fragment_shader": "minecraft:post/initial_ray/geometry_normal",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DataDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "output": "normals",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/initial_ray/initial_ray",
+      "fragment_shader": "minecraft:post/initial_ray/geometry_normal",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DataDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "output": "translucent_normals",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/initial_ray/initial_ray",
+      "fragment_shader": "minecraft:post/initial_ray/normal",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DataDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Normal",
+          "bilinear": false,
+          "target": "normals",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "output": "material_normal",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/initial_ray/initial_ray",
+      "fragment_shader": "minecraft:post/initial_ray/specular",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DataDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "output": "material_specular",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/direct_light/direct_light",
+      "fragment_shader": "minecraft:post/direct_light/direct_light",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DataDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "TranslucentDepth",
+          "bilinear": false,
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "MaterialNormal",
+          "bilinear": false,
+          "target": "material_normal",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "MaterialSpecular",
+          "bilinear": false,
+          "target": "material_specular",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "radiance",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/sky/render_sky",
+      "fragment_shader": "minecraft:post/sky/render_sky",
+      "inputs": [
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "sky",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/sky/add_sky",
+      "fragment_shader": "minecraft:post/sky/add_sky",
+      "inputs": [
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Sky",
+          "bilinear": false,
+          "target": "sky",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "radiance",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/water/water",
+      "fragment_shader": "minecraft:post/water/water",
+      "inputs": [
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Solid",
+          "bilinear": false,
+          "target": "radiance",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Translucent",
+          "bilinear": false,
+          "target": "minecraft:translucent",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "TranslucentDepth",
+          "bilinear": false,
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "MaterialNormal",
+          "bilinear": false,
+          "target": "material_normal",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "MaterialSpecular",
+          "bilinear": false,
+          "target": "material_specular",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "radiance_swap",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "radiance_swap",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_1",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_1",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_2",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_2",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_3",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_3",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_4",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_4",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_5",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_5",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_6",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_6",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_7",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_7",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_8",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_8",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_9",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_9",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_10",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/downsample",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "bloom_down_10",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_down_11",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_down_11",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_10",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_10",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_10",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_9",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_9",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_9",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_8",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_8",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_8",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_7",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_7",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_7",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_6",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_6",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_6",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_5",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_5",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_5",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_4",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_4",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_4",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_3",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_3",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_3",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_2",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_2",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_2",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "bloom_down_1",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_1",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/bloom/bloom_mip",
+      "fragment_shader": "minecraft:post/bloom/upsample",
+      "inputs": [
+        {
+          "sampler_name": "PreviousMip",
+          "bilinear": false,
+          "target": "bloom_up_1",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CurrentMip",
+          "bilinear": false,
+          "target": "radiance_swap",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "bloom_up_0",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/screenquad",
+      "fragment_shader": "minecraft:post/hdr_output/hdr_output",
+      "inputs": [
+        {
+          "sampler_name": "Direct",
+          "bilinear": false,
+          "target": "radiance_swap",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Bloom",
+          "bilinear": false,
+          "target": "bloom_up_0",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "final",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/screenquad",
+      "fragment_shader": "minecraft:post/transparency",
+      "inputs": [
+        {
+          "sampler_name": "Main",
+          "bilinear": false,
+          "target": "final",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "MainDepth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "ItemEntity",
+          "bilinear": false,
+          "target": "minecraft:item_entity",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "ItemEntityDepth",
+          "bilinear": false,
+          "target": "minecraft:item_entity",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Particles",
+          "bilinear": false,
+          "target": "minecraft:particles",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "ParticlesDepth",
+          "bilinear": false,
+          "target": "minecraft:particles",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Clouds",
+          "bilinear": false,
+          "target": "minecraft:clouds",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "CloudsDepth",
+          "bilinear": false,
+          "target": "minecraft:clouds",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Weather",
+          "bilinear": false,
+          "target": "minecraft:weather",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "WeatherDepth",
+          "bilinear": false,
+          "target": "minecraft:weather",
+          "use_depth_buffer": true
+        }
+      ],
+      "output": "result",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/screenquad",
+      "fragment_shader": "minecraft:post/blit",
+      "inputs": [
+        {
+          "sampler_name": "In",
+          "bilinear": false,
+          "target": "result",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "minecraft:main",
+      "uniforms": {
+        "BlitConfig": [
+          {
+            "name": "ColorModulate",
+            "type": "vec4",
+            "value": [
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

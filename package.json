@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@types/node": "^22.15.17",
+    "gl-matrix": "^3.4.3",
+    "typescript": "^5.8.3"
+  },
+  "name": "vpt",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "pipeline": "node --watch --experimental-strip-types src/pipeline/main.ts",
+    "assets": "node --experimental-strip-types src/assets/main.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/jszip": "^3.4.0",
+    "fast-png": "^7.0.1",
+    "jszip": "^3.10.1"
+  }
+}

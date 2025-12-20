@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Vanilla Path Tracing 2.0 in-dev version",
+    "min_format": 69,
+    "max_format": 300
+  }
+}

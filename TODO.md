@@ -1,0 +1,10 @@
+- Create settings.glsl file
+  - Migrate some stuff from constants.glsl
+  - Sky render resolution
+  - Sun path angle
+  - Max emission strength
+  - Water refraction fudge factor => water refraction strength
+- Clouds
+- Auto exposure
+- Farther voxel view distance
+- Remove the 3 pixel padding left by chunk position
