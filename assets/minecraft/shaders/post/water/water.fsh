@@ -92,7 +92,7 @@ void main() {
         topFace = true;
 
         float weight = 0.0;
-        float time = GameTime * 2400.0 * 3.0;
+        float time = GameTime * 200.0 * 2.0 * PI;
         vec2 deriv = vec2(0.0);
         float startOffset = min(log2(length(fragmentPos.xz) + 1.0) * 2.0, float(WAVE_PARAMS.length() - WAVE_COMPONENTS));
 
@@ -104,7 +104,7 @@ void main() {
             float scale = params.w;
             float dist = dot(worldPos.xz, dir);
 
-            float timeVal = mod(dist * frequency + time / 4.0, 2.0 * PI);
+            float timeVal = mod(dist * frequency + time, 2.0 * PI);
             vec2 componentDeriv = exp(sin(timeVal)) * cos(timeVal) * scale * frequency * dir;
 
             if (i == 0) {
