@@ -120,7 +120,7 @@ export async function parsePossibleBlockstates() {
   });
 
   BLOCK_STATE_IGNORE_LIST.forEach((ignored) =>
-    possibleBlockstates.delete(ignored)
+    possibleBlockstates.delete(ignored),
   );
 
   return possibleBlockstates;
@@ -160,7 +160,7 @@ function removeShading(model: Model) {
 function addDataQuadToModel(
   modelInfo: ModelInfo,
   model: Model,
-  dataTextureName: string
+  dataTextureName: string,
 ) {
   let faces = ["up", "down"] as FaceDirection[];
   if (modelInfo.x == 90) {
@@ -190,7 +190,7 @@ function addDataQuadToExistingModel(
   modelInfo: ModelInfo,
   model: Model,
   dataTextureName: string,
-  modelName: string
+  modelName: string,
 ) {
   const copy = JSON.parse(JSON.stringify(model)) as Model;
   copy.textures["__data"] = `block/${dataTextureName}`;
@@ -198,7 +198,7 @@ function addDataQuadToExistingModel(
   removeShading(copy);
   zip.file(
     `assets/minecraft/models/block/${modelName}.json`,
-    JSON.stringify(copy, null, 4)
+    JSON.stringify(copy, null, 4),
   );
 }
 
@@ -206,7 +206,7 @@ function createNewModelWithDataQuad(
   zip: JSZip,
   modelInfo: ModelInfo,
   dataTextureName: string,
-  modelName: string
+  modelName: string,
 ) {
   const model: Model = {
     textures: {},
@@ -218,7 +218,7 @@ function createNewModelWithDataQuad(
   removeShading(model);
   zip.file(
     `assets/minecraft/models/block/${modelName}.json`,
-    JSON.stringify(model, null, 4)
+    JSON.stringify(model, null, 4),
   );
 }
 
@@ -227,7 +227,7 @@ function generateAssetsForModelInfo<T extends ModelInfo>(
   variantName: string,
   models: Map<string, Model>,
   modelInfo: T,
-  modelId: number
+  modelId: number,
 ): T {
   const newModelName = `${variantName}__model_`;
   const dataTextureName = `${variantName}__data_`;
@@ -239,7 +239,7 @@ function generateAssetsForModelInfo<T extends ModelInfo>(
       modelInfo,
       model,
       dataTextureName,
-      newModelName
+      newModelName,
     );
   } else {
     createNewModelWithDataQuad(zip, modelInfo, dataTextureName, newModelName);
@@ -252,14 +252,14 @@ function generateAssetsForModelInfo<T extends ModelInfo>(
   };
 }
 
-async function parseVariants(
+async function generateVariants(
   zip: JSZip,
   blockstateName: string,
   variants: Variants,
   models: Map<string, Model>,
   textureLocations: Map<string, TextureLocation>,
   generatedModelData: Uint8Array[],
-  idMapping: Map<string, number>
+  idMapping: Map<string, number>,
 ) {
   let generatedModels = 0;
   for (const variant in variants) {
@@ -275,8 +275,8 @@ async function parseVariants(
       if (!model) {
         console.log(
           `Could not find model named "${sanitizeReference(
-            modelInfo.model
-          )}" in variants "${blockstateName}"`
+            modelInfo.model,
+          )}" in variants "${blockstateName}"`,
         );
         return;
       }
@@ -285,7 +285,7 @@ async function parseVariants(
         model,
         textureLocations,
         modelInfo.x,
-        modelInfo.y
+        modelInfo.y,
       );
 
       if (faces.length == 0) {
@@ -302,8 +302,8 @@ async function parseVariants(
           uniqueVariantName,
           models,
           modelInfo,
-          modelId
-        )
+          modelId,
+        ),
       );
     }
     variants[variant] = newModels;
@@ -314,7 +314,7 @@ function isConditionFulfilled(
   state: {
     [key: string]: string;
   },
-  condition: Condition
+  condition: Condition,
 ) {
   for (const key in condition) {
     if (!state[key] || condition[key].split("|").indexOf(state[key]) == -1) {
@@ -325,7 +325,7 @@ function isConditionFulfilled(
   return true;
 }
 
-async function parseMultipart(
+async function generateMultipart(
   zip: JSZip,
   blockstateName: string,
   multipart: Multipart,
@@ -333,7 +333,7 @@ async function parseMultipart(
   textureLocations: Map<string, TextureLocation>,
   generatedModelData: Uint8Array[],
   possibleBlockstates: Map<string, { [key: string]: string }[]>,
-  idMapping: Map<string, number>
+  idMapping: Map<string, number>,
 ) {
   let generatedModels = 0;
   const combinations = possibleBlockstates.get(blockstateName);
@@ -367,8 +367,8 @@ async function parseMultipart(
       if (!model) {
         console.log(
           `Could not find model named "${sanitizeReference(
-            modelInfo.model
-          )}" in multipart "${blockstateName}"`
+            modelInfo.model,
+          )}" in multipart "${blockstateName}"`,
         );
         return [];
       }
@@ -378,7 +378,7 @@ async function parseMultipart(
         model,
         textureLocations,
         modelInfo.x,
-        modelInfo.y
+        modelInfo.y,
       );
     });
 
@@ -395,7 +395,7 @@ async function parseMultipart(
         uniqueModelName,
         models,
         { model: "" },
-        modelId
+        modelId,
       ),
     });
   }
@@ -405,7 +405,7 @@ async function parseMultipart(
 export async function generateAssets(
   zip: JSZip,
   models: Map<string, Model>,
-  textureLocations: Map<string, TextureLocation>
+  textureLocations: Map<string, TextureLocation>,
 ) {
   const folder = zip.folder("assets/minecraft/blockstates/");
   if (!folder) {
@@ -431,17 +431,17 @@ export async function generateAssets(
 
     const blockstate = JSON.parse(content) as BlockState;
     if (blockstate.variants) {
-      await parseVariants(
+      await generateVariants(
         zip,
         blockstateName,
         blockstate.variants,
         models,
         textureLocations,
         generatedModelData,
-        idMapping
+        idMapping,
       );
     } else {
-      await parseMultipart(
+      await generateMultipart(
         zip,
         blockstateName,
         blockstate.multipart!,
@@ -449,23 +449,23 @@ export async function generateAssets(
         textureLocations,
         generatedModelData,
         possibleBlockstates,
-        idMapping
+        idMapping,
       );
     }
 
     // Write the modified blockstate out
     zip.file(
       `assets/minecraft/blockstates/${path}`,
-      JSON.stringify(blockstate, null, 4)
+      JSON.stringify(blockstate, null, 4),
     );
   }
 
   const modelDataWidth = Math.max(
-    ...generatedModelData.map((modelData) => modelData.length / 4)
+    ...generatedModelData.map((modelData) => modelData.length / 4),
   );
 
   const modelDataTexture = new Uint8Array(
-    modelDataWidth * generatedModelData.length * 4
+    modelDataWidth * generatedModelData.length * 4,
   );
   generatedModelData.forEach((modelData, y) => {
     modelDataTexture.set(modelData, y * modelDataWidth * 4);
@@ -482,6 +482,6 @@ export async function generateAssets(
 
   await fs.writeFile(
     `./out/ids.txt`,
-    [...idMapping.entries()].map(([name, id]) => `${name} = ${id}`).join("\n")
+    [...idMapping.entries()].map(([name, id]) => `${name} = ${id}`).join("\n"),
   );
 }

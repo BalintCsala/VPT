@@ -7,3 +7,5 @@
 - Clouds
 - Auto exposure
 - Farther voxel view distance
+- Water reflections
+- Screenspace fallback for tracing

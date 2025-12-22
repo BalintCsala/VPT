@@ -43,7 +43,7 @@ function flattenModelAncestry(
   name: string,
   model: Model,
   processedModels: Map<string, Model>,
-  unprocessedModels: Map<string, Model>
+  unprocessedModels: Map<string, Model>,
 ): Model {
   if (!model.parent) {
     return model;
@@ -55,7 +55,7 @@ function flattenModelAncestry(
     parentModel = unprocessedModels.get(parentName);
     if (!parentModel) {
       console.log(
-        `Failed to open model file ${parentName} requested by ${name}`
+        `Failed to open model file ${parentName} requested by ${name}`,
       );
       return model;
     }
@@ -63,7 +63,7 @@ function flattenModelAncestry(
       model.parent,
       parentModel,
       processedModels,
-      unprocessedModels
+      unprocessedModels,
     );
     processedModels.set(parentName, parentModel);
   }
@@ -93,7 +93,7 @@ export async function parseModels(zip: JSZip) {
       (async (name, file) => {
         const content = JSON.parse(await file.async("string")) as Model;
         unprocessedModels.set(name.replace(".json", ""), content);
-      })(name, file)
+      })(name, file),
     );
   });
   await Promise.allSettled(promises);
@@ -109,7 +109,7 @@ export async function parseModels(zip: JSZip) {
       name,
       model,
       processedModels,
-      unprocessedModels
+      unprocessedModels,
     );
     processedModels.set(name, flatModel);
   });
