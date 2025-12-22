@@ -7,4 +7,3 @@
 - Clouds
 - Auto exposure
 - Farther voxel view distance
-- Remove the 3 pixel padding left by chunk position

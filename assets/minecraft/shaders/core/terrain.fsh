@@ -89,11 +89,11 @@ void main() {
     if (isVoxel > 1.5) {
         // Data passthrough pixel
         int index = int(gl_FragCoord.x - ScreenSize.x / 2.0);
-        if (index < 3 + 16) {
-            int localIndex = index - 3;
+        if (index < 16) {
+            int localIndex = index;
             fragColor = encodeFloat(ModelViewMat[localIndex % 4][localIndex / 4]);
-        } else if (index < 3 + 16 + 16) {
-            int localIndex = index - 3 - 16;
+        } else if (index < 16 + 16) {
+            int localIndex = index - 16;
             fragColor = encodeFloat(ProjMat[localIndex % 4][localIndex / 4]);
         } else {
             // Unused

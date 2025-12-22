@@ -46,30 +46,54 @@ float decodeRoughness(float perceptualSmoothness) {
     return (1.0 - perceptualSmoothness) * (1.0 - perceptualSmoothness);
 }
 
-Material decodeScreenMaterial(vec3 albedo, vec4 normal, vec4 specular) {
-    float metallic = step(229.5 / 255.0, specular.g);
+vec3 getNormal(vec4 material1) {
+    return octahedronDecode(material1.xy);
+}
+
+vec3 getGeometryNormal(vec4 material1) {
+    return octahedronDecode(material1.zw);
+}
+
+float getRoughness(vec4 material2) {
+    return decodeRoughness(material2.r);
+}
+
+vec3 getF0(vec3 albedo, vec4 material2) {
+    return decodeF0(material2.g, albedo);
+}
+
+vec3 getEmission(vec3 albedo, vec4 material2) {
+    return material2.a < 1.0 ? albedo * material2.a * MAX_EMISSION : vec3(0.0);
+}
+
+float getAmbientOcclusion(vec4 material2) {
+    return material2.b;
+}
+
+Material decodeScreenMaterial(vec3 albedo, vec4 material1, vec4 material2) {
+    float metallic = step(229.5 / 255.0, material2.g);
 
     return Material(
         metallic > 0.5 ? vec3(0.0) : albedo,
-        decodeF0(specular.g, albedo),
-        decodeRoughness(specular.r),
+        getF0(albedo, material2),
+        getRoughness(material2),
         metallic,
-        normal.a,
-        specular.a < 1.0 ? albedo * specular.a * MAX_EMISSION : vec3(0.0),
-        normal.xyz * 2.0 - 1.0
+        getAmbientOcclusion(material2),
+        getEmission(albedo, material2),
+        getNormal(material1)
     );
 }
 
-Material decodeLabPBR(vec3 albedo, vec4 normal, vec4 specular, mat3 tbn) {
-    float metallic = step(229.5 / 255.0, specular.g);
+Material decodeLabPBR(vec3 albedo, vec4 n, vec4 s, mat3 tbn) {
+    float metallic = step(229.5 / 255.0, s.g);
     return Material(
         metallic > 0.5 ? vec3(0.0) : albedo,
-        decodeF0(specular.g, albedo),
-        decodeRoughness(specular.r),
+        decodeF0(s.g, albedo),
+        decodeRoughness(s.r),
         metallic,
-        normal.z,
-        specular.a < 1.0 ? albedo * specular.a * MAX_EMISSION : vec3(0.0),
-        decodeNormal(tbn, normal.xy)
+        n.z,
+        s.a < 1.0 ? albedo * s.a * MAX_EMISSION : vec3(0.0),
+        decodeNormal(tbn, n.xy)
     );
 }
 

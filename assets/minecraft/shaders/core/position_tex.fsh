@@ -25,7 +25,7 @@ out vec4 fragColor;
 
 void main() {
     if (sun > 0.5) {
-        int index = int(gl_FragCoord.x) - int(ScreenSize.x / 2.0 + 3.0 + 16.0 + 16.0);
+        int index = int(gl_FragCoord.x) - int(ScreenSize.x / 2.0 + 16.0 + 16.0);
         if (index == 3) {
             // Which "sun" are we drawing?
             fragColor = vec4(floor(sun) * 0.5, fract(sun), 0.0, 1.0);

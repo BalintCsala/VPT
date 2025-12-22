@@ -33,7 +33,7 @@ ScreenData parseScreenData(sampler2D screenSampler) {
     ScreenData screenData;
     #if defined(PROJ_MAT) || defined(PROJ_MAT_INV)
     for (int i = 0; i < 16; i++) {
-        screenData.projMat[i % 4][i / 4] = decodeFloat(texelFetch(screenSampler, startPixel + ivec2(3 + 16 + i, 0), 0));
+        screenData.projMat[i % 4][i / 4] = decodeFloat(texelFetch(screenSampler, startPixel + ivec2(16 + i, 0), 0));
     }
     #endif
     #ifdef PROJ_MAT_INV
@@ -41,7 +41,7 @@ ScreenData parseScreenData(sampler2D screenSampler) {
     #endif
     #if defined(VIEW_MAT) || defined(VIEW_MAT_INV)
     for (int i = 0; i < 16; i++) {
-        screenData.viewMat[i % 4][i / 4] = decodeFloat(texelFetch(screenSampler, startPixel + ivec2(3 + i, 0), 0));
+        screenData.viewMat[i % 4][i / 4] = decodeFloat(texelFetch(screenSampler, startPixel + ivec2(i, 0), 0));
     }
     #endif
     #ifdef VIEW_MAT_INV
@@ -49,7 +49,7 @@ ScreenData parseScreenData(sampler2D screenSampler) {
     #endif
     #ifdef SUN_DIRECTION
     for (int i = 0; i < 3; i++) {
-        screenData.sunDirection[i] = decodeHalf(texelFetch(screenSampler, startPixel + ivec2(3 + 16 + 16 + i, 0), 0));
+        screenData.sunDirection[i] = decodeHalf(texelFetch(screenSampler, startPixel + ivec2(16 + 16 + i, 0), 0));
     }
     screenData.sunDirection = mat3(screenData.viewMatInv) * screenData.sunDirection;
 
@@ -60,7 +60,7 @@ ScreenData parseScreenData(sampler2D screenSampler) {
     screenData.sunDirection.zy = rotMat * screenData.sunDirection.zy;
     #endif
     #ifdef SUN_INFO
-    vec4 sunInfoData = texelFetch(screenSampler, startPixel + ivec2(3 + 16 + 16 + 3, 0), 0);
+    vec4 sunInfoData = texelFetch(screenSampler, startPixel + ivec2(16 + 16 + 3, 0), 0);
     screenData.sunInfo = sunInfoData.r * 2.0 + sunInfoData.g;
     #endif
     return screenData;

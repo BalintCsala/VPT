@@ -21,7 +21,7 @@ int getVoxelRange() {
 ivec2 getVoxelPixelPos(ivec3 position) {
     int range = getVoxelRange();
     int halfRange = range / 2;
-    if (position.x < -halfRange || position.y < -halfRange || position.z < -halfRange || position.x >= halfRange || position.y >= halfRange || position.z >= halfRange) {
+    if (clamp(position, -halfRange + 1, halfRange) != position) {
         return ivec2(-1);
     }
     ivec3 unsignedPosition = position + halfRange;
@@ -44,3 +44,4 @@ vec4 decodeColorData(float depth) {
 }
 
 #endif // VOXELS_GLSL
+

@@ -7,7 +7,8 @@
 #moj_import <minecraft:globals.glsl>
 
 uniform sampler2D DataSampler;
-uniform sampler2D DataDepthSampler;
+uniform sampler2D DepthSampler;
+uniform sampler2D TranslucentDepthSampler;
 uniform sampler2D AtlasSampler;
 uniform sampler2D ModelDataSampler;
 
@@ -27,11 +28,18 @@ vec4 miss(vec2 texCoord, float depth);
 void main() {
     vec2 scaledTexCoord = texCoord * vec2(0.5, 1.0);
 
-    float depth = textureLod(DataDepthSampler, scaledTexCoord, 0.0).r;
+    float depth = textureLod(DepthSampler, scaledTexCoord, 0.0).r;
+    float translucentDepth = textureLod(TranslucentDepthSampler, scaledTexCoord, 0.0).r;
 
-    if (depth == 1.0) {
+    if (min(depth, translucentDepth) == 1.0) {
         // Sky
         fragColor = vec4(0.0);
+        return;
+    }
+
+    if (translucentDepth < depth) {
+        // Can't trace translucent blocks currently
+        fragColor = miss(texCoord, depth);
         return;
     }
 
@@ -42,7 +50,7 @@ void main() {
     vec3 origin = fragmentPos - rayDir * 0.1;
 
     Ray ray = createRayFromSinglePosition(origin, rayDir);
-    Intersection intersection = raytrace(DataDepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+    Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
     if (!intersection.hit || intersection.t > 0.15) {
         // Missing block or entity
         fragColor = miss(texCoord, depth);

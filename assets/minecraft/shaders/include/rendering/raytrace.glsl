@@ -23,24 +23,19 @@ Intersection raytrace(sampler2D voxelSampler, sampler2D voxelDataSampler, sample
             // We reached outside of the voxel map
             break;
         }
-        float voxelDepth = texelFetch(voxelSampler, voxelPixelPos, 0).r;
-        if (voxelDepth < 1.0) {
-            vec4 data = texelFetch(voxelDataSampler, voxelPixelPos, 0);
+        vec4 data = texelFetch(voxelDataSampler, voxelPixelPos, 0);
+        if (data != vec4(0.0) && data != vec4(1.0)) {
             uint modelId = parseModelIdFromData(data);
 
             Intersection intersection = intersectModel(modelDataSampler, atlasSampler, ray, voxelPos, modelId);
             if (intersection.hit) {
                 if (intersection.tintable) {
+                    float voxelDepth = texelFetch(voxelSampler, voxelPixelPos, 0).r;
                     vec4 colorData = decodeColorData(voxelDepth);
                     intersection.albedo *= colorData;
                 }
                 return intersection;
             }
-        }
-
-        if (i == MAX_STEPS - 1) {
-            // Don't waste resources on the last iteration
-            break;
         }
 
         float closestDist = min(min(nextDist.x, nextDist.y), nextDist.z);

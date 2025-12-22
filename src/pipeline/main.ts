@@ -15,6 +15,7 @@ import {
 import fs from "fs/promises";
 import { generateSettingsFile } from "./lib/settings.ts";
 import { applyBloom } from "./bloom/Bloom.ts";
+import { truncateSync } from "fs";
 
 // Assuming some crazy person runs the shader on a super ultrawide 2x4k screen
 const MAX_WIDTH = 7920;
@@ -26,73 +27,63 @@ generateSettingsFile([
 
 const pipeline = new Pipeline();
 
-const normals = pipeline.addTarget(new Target("normals"));
+const material1 = pipeline.addTarget(new Target("material1"));
 pipeline.addPass(
   new Pass(
     "minecraft:post/initial_ray/initial_ray",
-    "minecraft:post/initial_ray/geometry_normal",
+    "minecraft:post/initial_ray/material1",
     {},
     [
       new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
       new TargetInput("Depth", implicitMainTarget, true),
+      new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
+      new TargetInput("MainDepth", implicitMainTarget, true),
       new FileInput("Atlas", "minecraft:atlas"),
       new FileInput("ModelData", "minecraft:model_data"),
     ],
-    normals,
+    material1,
   ),
 );
 
-const translucentNormals = pipeline.addTarget(
-  new Target("translucent_normals"),
+const material2 = pipeline.addTarget(new Target("material2"));
+pipeline.addPass(
+  new Pass(
+    "minecraft:post/initial_ray/initial_ray",
+    "minecraft:post/initial_ray/material2",
+    {},
+    [
+      new TargetInput("Data", implicitMainTarget),
+      new TargetInput("Depth", implicitMainTarget, true),
+      new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
+      new FileInput("Atlas", "minecraft:atlas"),
+      new FileInput("ModelData", "minecraft:model_data"),
+    ],
+    material2,
+  ),
+);
+
+const translucentMaterial1 = pipeline.addTarget(
+  new Target("translucent_material1"),
 );
 pipeline.addPass(
   new Pass(
     "minecraft:post/initial_ray/initial_ray",
-    "minecraft:post/initial_ray/geometry_normal",
+    "minecraft:post/initial_ray/material1",
     {},
     [
       new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
-      new TargetInput("Depth", implicitTranslucentTarget, true),
+      new TargetInput("Depth", implicitMainTarget, true),
+      new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
+      new TargetInput("MainDepth", implicitTranslucentTarget, true),
       new FileInput("Atlas", "minecraft:atlas"),
       new FileInput("ModelData", "minecraft:model_data"),
     ],
-    translucentNormals,
+    translucentMaterial1,
   ),
 );
 
-const materialNormals = pipeline.addTarget(new Target("material_normal"));
-pipeline.addPass(
-  new Pass(
-    "minecraft:post/initial_ray/initial_ray",
-    "minecraft:post/initial_ray/normal",
-    {},
-    [
-      new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
-      new TargetInput("Normal", normals),
-      new FileInput("Atlas", "minecraft:atlas"),
-      new FileInput("ModelData", "minecraft:model_data"),
-    ],
-    materialNormals,
-  ),
-);
-
-const materialSpecular = pipeline.addTarget(new Target("material_specular"));
-pipeline.addPass(
-  new Pass(
-    "minecraft:post/initial_ray/initial_ray",
-    "minecraft:post/initial_ray/specular",
-    {},
-    [
-      new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
-      new FileInput("Atlas", "minecraft:atlas"),
-      new FileInput("ModelData", "minecraft:model_data"),
-    ],
-    materialSpecular,
-  ),
+const translucentMaterial2 = pipeline.addTarget(
+  new Target("translucent_material2").setClearColor(0.01, 0.04, 0.0, 0.0),
 );
 
 let radiance = pipeline.addTarget(new Target("radiance"));
@@ -103,27 +94,16 @@ pipeline.addPass(
     {},
     [
       new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
+      new TargetInput("Depth", implicitMainTarget, true),
       new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
       new FileInput("Atlas", "minecraft:atlas"),
       new FileInput("ModelData", "minecraft:model_data"),
-      new TargetInput("MaterialNormal", materialNormals),
-      new TargetInput("MaterialSpecular", materialSpecular),
+      new TargetInput("Material1", material1),
+      new TargetInput("Material2", material2),
     ],
     radiance,
   ),
 );
-
-// const sky = pipeline.addTarget(new Target("sky", 512, 512));
-// pipeline.addPass(
-//   new Pass(
-//     "minecraft:post/render_sky/render_sky",
-//     "minecraft:post/render_sky/render_sky",
-//     {},
-//     [new TargetInput("Data", implicitMainTarget)],
-//     sky
-//   )
-// );
 
 /*const diffuseGI = pipeline.addTarget(new Target("diffuse_gi"));
 pipeline.addPass(
@@ -133,14 +113,13 @@ pipeline.addPass(
     {},
     [
       new TargetInput("Data", implicitMainTarget),
-      new TargetInput("DataDepth", implicitMainTarget, true),
+      new TargetInput("Depth", implicitMainTarget, true),
       new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
-      new TargetInput("Normal", normals),
-      new TargetInput("TranslucentNormal", translucentNormals),
+      new TargetInput("TranslucentNormal", translucentNormal),
       new FileInput("Atlas", "minecraft:atlas"),
       new FileInput("ModelData", "minecraft:model_data"),
-      new TargetInput("MaterialNormal", materialNormals),
-      new TargetInput("MaterialSpecular", materialSpecular),
+      new TargetInput("Material1", material1),
+      new TargetInput("Material2", Material2),
     ],
     diffuseGI
   )
@@ -202,8 +181,10 @@ pipeline.addPass(
       new TargetInput("Depth", implicitMainTarget, true),
       new TargetInput("Translucent", implicitTranslucentTarget),
       new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
-      new TargetInput("MaterialNormal", materialNormals),
-      new TargetInput("MaterialSpecular", materialSpecular),
+      new TargetInput("Material1", material1),
+      new TargetInput("Material2", material2),
+      new TargetInput("TranslucentMaterial1", translucentMaterial1),
+      new TargetInput("TranslucentMaterial2", translucentMaterial2),
     ],
     radianceSwap,
   ),

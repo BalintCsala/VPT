@@ -8,6 +8,7 @@
 #moj_import <minecraft:rendering/atmosphere.glsl>
 #moj_import <minecraft:math/constants.glsl>
 #moj_import <minecraft:rendering/raytrace.glsl>
+#moj_import <minecraft:rendering/pbr/material.glsl>
 
 const vec3 WATER_EXTINCTION_COEFF = vec3(1.2340e-8, 2.1344e-9, 9.724e-10) * 4.0 * PI / RGB_WAVELENGTHS;
 const float WATER_IOR = 1.333;
@@ -22,8 +23,10 @@ uniform sampler2D SolidSampler;
 uniform sampler2D DepthSampler;
 uniform sampler2D TranslucentSampler;
 uniform sampler2D TranslucentDepthSampler;
-uniform sampler2D MaterialNormalSampler;
-uniform sampler2D MaterialSpecularSampler;
+uniform sampler2D Material1Sampler;
+uniform sampler2D Material2Sampler;
+uniform sampler2D TranslucentMaterial1Sampler;
+uniform sampler2D TranslucentMaterial2Sampler;
 
 in mat4 projMat;
 in mat4 projMatInv;
@@ -55,6 +58,7 @@ const vec4[] WAVE_PARAMS = vec4[](
 const int WAVE_COMPONENTS = 6;
 
 void main() {
+    gl_FragDepth = 0.1;
     uint randState = initRNG(uvec2(gl_FragCoord.xy), uvec2(ScreenSize), uint(GameTime * 20.0 * 60.0 * 300.0));
 
     vec2 scaledTexCoord = texCoord * vec2(0.5, 1.0);
@@ -62,7 +66,7 @@ void main() {
     float solidDepth = textureLod(DepthSampler, scaledTexCoord, 0.0).r;
     float translucentDepth = textureLod(TranslucentDepthSampler, scaledTexCoord, 0.0).r;
 
-    if (translucentDepth >= solidDepth) {
+    if (translucentDepth == solidDepth) {
         // Solid
         fragColor = textureLod(SolidSampler, texCoord, 0.0);
         return;
@@ -70,21 +74,29 @@ void main() {
 
     vec4 translucentColor = textureLod(TranslucentSampler, scaledTexCoord, 0.0);
     vec4 diff = translucentColor - vec4(0.0, 0.0, 0.0, 1.0);
-    if (dot(diff, diff) < 0.001) {
-        // Water
-        vec3 cameraPosition = vec3(CameraBlockPos) - fract(CameraOffset);
-        vec3 fragmentPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, translucentDepth));
-        vec3 solidPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, solidDepth));
-        vec3 worldPos = fragmentPos + cameraPosition;
+    if (dot(diff, diff) > 0.001) {
+        // TODO: Stained glass
+        fragColor = encodeHDR(vec3(0.0));
+        return;
+    }
+
+    vec3 cameraPosition = vec3(CameraBlockPos) - fract(CameraOffset);
+    vec3 fragmentPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, translucentDepth));
+    vec3 solidPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, solidDepth));
+    vec3 worldPos = fragmentPos + cameraPosition;
+
+    bool topFace = false;
+    vec4 material1 = textureLod(TranslucentMaterial1Sampler, texCoord, 0.0);
+    vec3 normal = getNormal(material1);
+    if (normal.y > 0.95) {
+        topFace = true;
 
         float weight = 0.0;
-        float time = GameTime * 2400.0 * 0.5;
-
+        float time = GameTime * 2400.0 * 3.0;
         vec2 deriv = vec2(0.0);
-
-        uint waveRand = 123457;
         float startOffset = min(log2(length(fragmentPos.xz) + 1.0) * 2.0, float(WAVE_PARAMS.length() - WAVE_COMPONENTS));
 
+        uint waveRand = 123457;
         for (int i = 0; i < WAVE_COMPONENTS; i++) {
             vec4 params = WAVE_PARAMS[i + int(startOffset)];
             vec2 dir = params.xy;
@@ -92,7 +104,7 @@ void main() {
             float scale = params.w;
             float dist = dot(worldPos.xz, dir);
 
-            float timeVal = dist * frequency + time * frequency / 4.0;
+            float timeVal = mod(dist * frequency + time / 4.0, 2.0 * PI);
             vec2 componentDeriv = exp(sin(timeVal)) * cos(timeVal) * scale * frequency * dir;
 
             if (i == 0) {
@@ -108,116 +120,136 @@ void main() {
         }
         deriv *= 5.0 / 16.0;
 
-        vec3 normal = normalize(cross(vec3(0, deriv.y, 1), vec3(1, deriv.x, 0)));
-        normal = normalize(mix(vec3(0, 1, 0), normal, exp(-length(fragmentPos) * 0.02)));
+        normal = cross(vec3(0, deriv.y, 1), vec3(1, deriv.x, 0));
+        vec3 viewDir = normalize(fragmentPos);
+        normal -= max(dot(normal, viewDir), 0.0) * viewDir;
+        normal = normalize(normal);
+    }
 
-        float distInWater = distance(fragmentPos, solidPos);
-        vec3 viewDir = (fragmentPos - solidPos) / distInWater;
+    float distInWater = distance(fragmentPos, solidPos);
+    vec3 viewDir = (fragmentPos - solidPos) / distInWater;
 
-        vec3 sunDir = normalize(sunDirection);
+    vec3 sunDir = normalize(sunDirection);
 
-        vec3 refractedDir = refract(-viewDir, normal, 1.0 / WATER_IOR);
-        refractedDir = normalize(mix(-viewDir, refractedDir, REFRACTION_FUDGE_FACTOR));
-        Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), refractedDir);
+    vec3 refractedDir = refract(-viewDir, normal, 1.0 / WATER_IOR);
+    refractedDir = normalize(mix(-viewDir, refractedDir, REFRACTION_FUDGE_FACTOR));
+    Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), refractedDir);
 
-        vec4 startClipPos = playerToClip(projMat, viewMat, fragmentPos);
-        vec3 startScreenPos = startClipPos.xyz / startClipPos.w * 0.5 + 0.5;
+    vec4 startClipPos = playerToClip(projMat, viewMat, fragmentPos);
+    vec3 startScreenPos = startClipPos.xyz / startClipPos.w * 0.5 + 0.5;
 
-        Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+    Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
 
-        float dist;
-        if (intersection.hit) {
-            dist = intersection.t;
-        } else {
-            dist = distInWater * dot(refractedDir, -viewDir);
-        }
+    float dist;
+    if (intersection.hit) {
+        dist = intersection.t;
+    } else {
+        dist = distInWater;
+    }
 
-        vec3 endPos = fragmentPos + refractedDir * dist;
-        vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
-        bool endPosInside = clamp(endClipPos.xyz, -endClipPos.w, endClipPos.w) == endClipPos.xyz;
-        vec3 endScreenPos = endClipPos.xyz / endClipPos.w * 0.5 + 0.5;
+    vec3 endPos = fragmentPos + refractedDir * dist;
+    vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
+    bool endPosInside = clamp(endClipPos.xyz, -endClipPos.w, endClipPos.w) == endClipPos.xyz;
+    vec3 endScreenPos = endClipPos.xyz / endClipPos.w * 0.5 + 0.5;
 
-        bool foundHit = false;
-        Material material;
-        if (endPosInside) {
-            vec3 rtStep = (endScreenPos - startScreenPos) / float(SSRT_STEPS - 1);
-            vec3 pos = startScreenPos + rtStep * randFloat(randState);
+    bool foundHit = false;
+    Material material;
+    if (endPosInside) {
+        vec3 rtStep = (endScreenPos - startScreenPos) / float(SSRT_STEPS - 1);
+        vec3 pos = startScreenPos + rtStep * randFloat(randState);
 
-            for (int i = 0; i < SSRT_STEPS; i++) {
-                float depth = textureLod(DepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
-                float translucentDepth = textureLod(TranslucentDepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
-                if (translucentDepth == depth) {
-                    // Ray went outside of the water area, can't do anything from here
-                    break;
-                }
+        for (int i = 0; i < SSRT_STEPS; i++) {
+            float depth = textureLod(DepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
+            float translucentDepth = textureLod(TranslucentDepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
+            if (translucentDepth == depth) {
+                // Ray went outside of the water area, can't do anything from here
+                break;
+            }
 
-                if (depth < pos.z) {
-                    vec4 baseColor = textureLod(DataSampler, pos.xy * vec2(0.5, 1.0), 0.0);
-                    if (abs(baseColor.a - ENTITY_MASK) < 0.5 / 255.0) {
-                        vec3 viewPos = screenToView(projMatInv, vec3(pos.xy, depth));
-                        viewPos.z -= SSRT_THICKNESS;
-                        vec3 screenPos = viewToScreen(projMat, viewPos);
-                        if (pos.z < screenPos.z) {
-                            endPos = (viewMatInv * vec4(viewPos, 1.0)).xyz;
-                            dist = distance(fragmentPos, endPos);
-                            foundHit = true;
-                            material = decodeScreenMaterial(
-                                    srgbToLinear(baseColor.rgb),
-                                    textureLod(MaterialNormalSampler, pos.xy, 0.0),
-                                    textureLod(MaterialSpecularSampler, pos.xy, 0.0)
-                                );
-                            break;
-                        }
+            if (depth < pos.z) {
+                vec4 baseColor = textureLod(DataSampler, pos.xy * vec2(0.5, 1.0), 0.0);
+                if (abs(baseColor.a - ENTITY_MASK) < 0.5 / 255.0) {
+                    vec3 viewPos = screenToView(projMatInv, vec3(pos.xy, depth));
+                    viewPos.z -= SSRT_THICKNESS;
+                    vec3 screenPos = viewToScreen(projMat, viewPos);
+                    if (pos.z < screenPos.z) {
+                        endPos = (viewMatInv * vec4(viewPos, 1.0)).xyz;
+                        dist = distance(fragmentPos, endPos);
+                        foundHit = true;
+                        material = decodeScreenMaterial(
+                                srgbToLinear(baseColor.rgb),
+                                textureLod(Material1Sampler, pos.xy, 0.0),
+                                textureLod(Material2Sampler, pos.xy, 0.0)
+                            );
+                        break;
                     }
                 }
-
-                pos += rtStep;
             }
-        }
 
-        if (!foundHit) {
-            if (intersection.hit) {
-                material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
-            } else if (endPosInside && abs(1.0 / (1.005 - endScreenPos.z) - 1.0 / (1.005 - textureLod(DepthSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).r)) < 30.0) {
-                material = decodeScreenMaterial(
-                        srgbToLinear(textureLod(DataSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).rgb),
-                        textureLod(MaterialNormalSampler, endScreenPos.xy, 0.0),
-                        textureLod(MaterialSpecularSampler, endScreenPos.xy, 0.0)
-                    );
-            } else {
-                material = Material(vec3(1.0), vec3(0.0), 0.0, 0.0, 0.0, vec3(0.0), vec3(0, 1, 0));
-            }
+            pos += rtStep;
         }
+    }
 
-        float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
-        vec3 intensity = lightIntensity;
+    if (!foundHit) {
+        if (intersection.hit) {
+            material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
+        } else if (endPosInside && abs(1.0 / (1.005 - endScreenPos.z) - 1.0 / (1.005 - textureLod(DepthSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).r)) < 15.0) {
+            material = decodeScreenMaterial(
+                    srgbToLinear(textureLod(DataSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).rgb),
+                    textureLod(Material1Sampler, endScreenPos.xy, 0.0),
+                    textureLod(Material2Sampler, endScreenPos.xy, 0.0)
+                );
+        } else {
+            // Nothing to fall back to
+            material = Material(vec3(0.0), vec3(0.0), 1.0, 0.0, 0.0, vec3(0, 0, 0), vec3(0, 0, 0));
+        }
+    }
+
+    vec3 radiance = vec3(0, 0, 0);
+    if (solidDepth == 1.0) {
+        // Sky behind water
+        radiance = decodeHDR(textureLod(SolidSampler, texCoord, 0.0));
+        dist = min(dist, 1.4);
+    } else {
+        radiance = material.emission + 0.05 * material.albedo * (1.0 - material.metallic);
+        float NdotL = dot(material.normal, sunDir);
         if (NdotL > 0.001) {
             Ray sunRay = Ray(intersection.voxelPos, endPos - fract(CameraOffset), sunDir);
             Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
-            if (sunIntersection.hit) {
-                intensity = vec3(0.0);
+            if (!sunIntersection.hit) {
+                radiance += brdf(material, material.normal, -refractedDir, sunDir, NdotL) * lightIntensity * NdotL;
             }
         }
-        vec3 color = brdf(material, material.normal, -refractedDir, sunDir, NdotL) * intensity * NdotL + material.emission;
-
-        color *= exp(-dist * WATER_EXTINCTION_COEFF * 2);
-
-        Material waterMaterial = Material(
-                vec3(0.0),
-                vec3(0.02),
-                0.0015,
-                0.0,
-                0.0,
-                vec3(0.0),
-                normal
-            );
-        vec3 specular = brdf(waterMaterial, normal, viewDir, sunDir, clamp(dot(sunDir, normal), 0.0, 1.0)) * LIGHT_INTENSITY;
-
-        color = mix(color, specular, fresnelSchlick(vec3(0.02), clamp(dot(normal, viewDir), 0.001, 0.999)).x);
-        color += 0.05 * material.albedo * (1.0 - material.metallic);
-        fragColor = encodeHDR(color);
-    } else {
-        // TODO: Stained glass
-        fragColor = encodeHDR(vec3(0.0));
     }
+
+    if (!topFace) {
+        // Limit absorption for vertical faces as these are normally on "waterfalls"
+        dist = min(dist, 1.4);
+    }
+
+    if (dist < 0.0) {
+        fragColor = encodeHDR(vec3(1, 0, 0));
+        return;
+    }
+    radiance *= exp(-dist * WATER_EXTINCTION_COEFF);
+
+    Material waterMaterial = Material(
+            vec3(0.0),
+            vec3(0.02),
+            0.0015,
+            0.0,
+            0.0,
+            vec3(0.0),
+            normal
+        );
+
+    {
+        float NdotL = dot(waterMaterial.normal, sunDir);
+        if (NdotL > 0.001) {
+            vec3 specular = brdf(waterMaterial, normal, viewDir, sunDir, clamp(dot(sunDir, normal), 0.0, 1.0)) * NdotL * lightIntensity;
+            radiance = mix(radiance, specular, fresnelSchlick(vec3(0.02), clamp(dot(normal, viewDir), 0.001, 0.999)).x);
+        }
+    }
+
+    fragColor = encodeHDR(radiance);
 }

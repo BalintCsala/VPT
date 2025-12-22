@@ -95,7 +95,7 @@ export class TargetInput extends Input {
     samplerName: string,
     target: Target,
     useDepth: boolean = false,
-    bilinear: boolean = false
+    bilinear: boolean = false,
   ) {
     super(samplerName, bilinear);
     this.#target = target;
@@ -125,7 +125,7 @@ export class Pass {
     fragmentShader: string,
     uniforms: { [key: string]: Uniform[] },
     inputs: Input[],
-    output: Target
+    output: Target,
   ) {
     this.#vertexShader = vertexShader;
     this.#fragmentShader = fragmentShader;
@@ -171,17 +171,14 @@ export class Pipeline {
       passes: this.#passes.map((pass) => pass.generate()),
     };
     this.#targets.forEach((target, name) => {
-      if (!target.usedAsOutput) return;
+      if (!target.usedAsOutput && !target.usedAsInput) return;
       // @ts-ignore
       result.targets[name] = target.generate();
     });
 
     this.#targets.forEach((target) => {
-      if (!target.usedAsInput) {
-        console.warn(`Target ${target.name} was never read from`);
-      }
-      if (!target.usedAsOutput) {
-        console.warn(`Target ${target.name} was never written to`);
+      if (!target.usedAsInput && !target.usedAsOutput) {
+        console.warn(`Target ${target.name} is unused`);
       }
     });
 

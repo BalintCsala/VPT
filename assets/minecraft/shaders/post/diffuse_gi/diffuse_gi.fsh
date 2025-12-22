@@ -9,14 +9,14 @@
 #moj_import <minecraft:globals.glsl>
 
 uniform sampler2D DataSampler;
-uniform sampler2D DataDepthSampler;
+uniform sampler2D DepthSampler;
 uniform sampler2D TranslucentDepthSampler;
-uniform sampler2D NormalSampler;
-uniform sampler2D TranslucentNormalSampler;
 uniform sampler2D AtlasSampler;
 uniform sampler2D ModelDataSampler;
-uniform sampler2D MaterialNormalSampler;
-uniform sampler2D MaterialSpecularSampler;
+uniform sampler2D Material1Sampler;
+uniform sampler2D Material2Sampler;
+uniform sampler2D TranslucentMaterial1Sampler;
+uniform sampler2D TranslucentMaterial2Sampler;
 
 in mat4 projMat;
 in mat4 projMatInv;
@@ -42,7 +42,7 @@ void main() {
     vec2 scaledTexCoord = txCoord * vec2(0.5, 1.0);
     vec3 albedo = srgbToLinear(textureLod(DataSampler, scaledTexCoord, 0.0).rgb);
 
-    float depth = textureLod(DataDepthSampler, scaledTexCoord, 0.0).r;
+    float depth = textureLod(DepthSampler, scaledTexCoord, 0.0).r;
     float translucentDepth = textureLod(TranslucentDepthSampler, scaledTexCoord, 0.0).r;
     bool translucent = false;
 
@@ -57,10 +57,11 @@ void main() {
         material.metallic = 0.0;
         material.ambientOcclusion = 0.0;
         material.emission = vec3(0.0);
-        material.normal = textureLod(TranslucentNormalSampler, txCoord, 0.0).rgb * 2.0 - 1.0;
+        material.normal = getNormal(textureLod(TranslucentMaterial1Sampler, txCoord, 0.0).rgb);
     } else {
-        vec3 geometryNormal = textureLod(NormalSampler, txCoord, 0.0).rgb * 2.0 - 1.0;
-        material = decodeReducedMaterial(textureLod(MaterialMapSampler, txCoord, 0.0), albedo, geometryNormal);
+        //vec3 geometryNormal = textureLod(NormalSampler, txCoord, 0.0).rgb * 2.0 - 1.0;
+        //material = decodeReducedMaterial(textureLod(MaterialMapSampler, txCoord, 0.0), albedo, geometryNormal);
+        // TODO
     }
 
     if (material.metallic > 0.5) {
@@ -97,22 +98,20 @@ void main() {
         if (i != 0) {
             throughput *= samp.throughput;
         }
-        Intersection intersection = raytrace(DataDepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+        Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
 
         if (!intersection.hit) {
             radiance += throughput * SKYLIGHT_INTENSITY;
             break;
         }
 
-        vec4 normal = textureLod(MaterialNormalSampler, texCoord, 0.0);
-        vec4 specular = textureLod(MaterialSpecularSampler, texCoord, 0.0);
         material = readMaterialFromAtlas(AtlasSampler, intersection.uv, intersection.tbn);
         radiance += throughput * material.emission;
         vec3 hitPos = ray.origin + ray.direction * intersection.t;
 
         if (dot(intersection.tbn[2], sunDirection) > 0.0) {
             Ray sunRay = Ray(intersection.voxelPos, hitPos, sunDirection);
-            Intersection sunIntersection = raytrace(DataDepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
+            Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
             if (!sunIntersection.hit) {
                 float NdotL = clamp(dot(material.normal, normalize(sunDirection)), 0.0, 1.0);
                 radiance += throughput * brdf(material, material.normal, -ray.direction, sunDirection, NdotL) * LIGHT_INTENSITY * NdotL;

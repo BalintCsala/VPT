@@ -9,14 +9,14 @@
 #moj_import <minecraft:rendering/atmosphere.glsl>
 
 uniform sampler2D DataSampler;
-uniform sampler2D DataDepthSampler;
+uniform sampler2D DepthSampler;
 uniform sampler2D TranslucentDepthSampler;
-uniform sampler2D NormalSampler;
-uniform sampler2D TranslucentNormalSampler;
 uniform sampler2D AtlasSampler;
 uniform sampler2D ModelDataSampler;
-uniform sampler2D MaterialNormalSampler;
-uniform sampler2D MaterialSpecularSampler;
+uniform sampler2D Material1Sampler;
+uniform sampler2D Material2Sampler;
+uniform sampler2D TranslucentMaterial1Sampler;
+uniform sampler2D TranslucentMaterial2Sampler;
 
 in mat4 projMat;
 in mat4 projMatInv;
@@ -34,7 +34,7 @@ void main() {
     vec2 scaledTexCoord = texCoord * vec2(0.5, 1.0);
     vec3 albedo = srgbToLinear(textureLod(DataSampler, scaledTexCoord, 0.0).rgb);
 
-    float depth = textureLod(DataDepthSampler, scaledTexCoord, 0.0).r;
+    float depth = textureLod(DepthSampler, scaledTexCoord, 0.0).r;
     float translucentDepth = textureLod(TranslucentDepthSampler, scaledTexCoord, 0.0).r;
 
     if (depth > translucentDepth) {
@@ -49,10 +49,10 @@ void main() {
         return;
     }
 
-    vec3 geometryNormal = textureLod(NormalSampler, texCoord, 0.0).rgb * 2.0 - 1.0;
-    vec4 normal = textureLod(MaterialNormalSampler, texCoord, 0.0);
-    vec4 specular = textureLod(MaterialSpecularSampler, texCoord, 0.0);
-    Material material = decodeScreenMaterial(albedo, normal, specular);
+    vec4 material1 = textureLod(Material1Sampler, texCoord, 0.0);
+    vec4 material2 = textureLod(Material2Sampler, texCoord, 0.0);
+    vec3 geometryNormal = getGeometryNormal(material1);
+    Material material = decodeScreenMaterial(albedo, material1, material2);
 
     vec4 screenPos = vec4(texCoord, depth, 1.0);
     vec4 tmp = viewMatInv * projMatInv * (screenPos * 2.0 - 1.0);
@@ -64,7 +64,7 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
     float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
 
-    vec3 radiance = 0.05 * albedo * (1.0 - material.metallic);
+    vec3 radiance = 0.05 * albedo * (1.0 - material.metallic) + material.emission;
     if (NdotL > 0.001) {
         vec3 intensity = lightIntensity;
         if (sunInfo >= 2.0) {
@@ -72,10 +72,10 @@ void main() {
         }
 
         Ray sunRay = Ray(voxelPos, hitPos, sunDir);
-        Intersection sunIntersection = raytrace(DataDepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
+        Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
         if (!sunIntersection.hit) {
             vec3 view = -normalize(playerPos);
-            radiance += brdf(material, material.normal, view, sunDir, NdotL) * intensity * NdotL + material.emission;
+            radiance += brdf(material, material.normal, view, sunDir, NdotL) * intensity * NdotL;
         }
     }
 

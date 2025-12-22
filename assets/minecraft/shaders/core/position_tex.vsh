@@ -60,7 +60,7 @@ void main() {
             sun = 2.0 + vertexColor.a * 254.0 / 255.0;
         }
 
-        ivec2 vertexOffset = ivec2(ScreenSize.x / 2.0, ScreenSize.y - 1.0) + ivec2(3 + 16 + 16, 0) + VERTEX_OFFSETS[gl_VertexID] * ivec2(4, 1);
+        ivec2 vertexOffset = ivec2(ScreenSize.x / 2.0, ScreenSize.y - 1.0) + ivec2(16 + 16, 0) + VERTEX_OFFSETS[gl_VertexID] * ivec2(4, 1);
 
         gl_Position = vec4(
                 vec2(vertexOffset) / ScreenSize * 2.0 - 1.0,

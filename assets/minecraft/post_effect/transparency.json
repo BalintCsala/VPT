@@ -1,6 +1,6 @@
 {
   "targets": {
-    "normals": {
+    "material1": {
       "persistent": true,
       "clear_color": [
         0,
@@ -9,7 +9,7 @@
         0
       ]
     },
-    "translucent_normals": {
+    "material2": {
       "persistent": true,
       "clear_color": [
         0,
@@ -18,7 +18,7 @@
         0
       ]
     },
-    "material_normal": {
+    "translucent_material1": {
       "persistent": true,
       "clear_color": [
         0,
@@ -27,11 +27,11 @@
         0
       ]
     },
-    "material_specular": {
+    "translucent_material2": {
       "persistent": true,
       "clear_color": [
-        0,
-        0,
+        0.01,
+        0.04,
         0,
         0
       ]
@@ -327,7 +327,7 @@
   "passes": [
     {
       "vertex_shader": "minecraft:post/initial_ray/initial_ray",
-      "fragment_shader": "minecraft:post/initial_ray/geometry_normal",
+      "fragment_shader": "minecraft:post/initial_ray/material1",
       "inputs": [
         {
           "sampler_name": "Data",
@@ -336,13 +336,19 @@
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "DataDepth",
+          "sampler_name": "Depth",
           "bilinear": false,
           "target": "minecraft:main",
           "use_depth_buffer": true
         },
         {
-          "sampler_name": "Depth",
+          "sampler_name": "TranslucentDepth",
+          "bilinear": false,
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "MainDepth",
           "bilinear": false,
           "target": "minecraft:main",
           "use_depth_buffer": true
@@ -362,12 +368,12 @@
           "height": 1
         }
       ],
-      "output": "normals",
+      "output": "material1",
       "uniforms": {}
     },
     {
       "vertex_shader": "minecraft:post/initial_ray/initial_ray",
-      "fragment_shader": "minecraft:post/initial_ray/geometry_normal",
+      "fragment_shader": "minecraft:post/initial_ray/material2",
       "inputs": [
         {
           "sampler_name": "Data",
@@ -376,13 +382,13 @@
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "DataDepth",
+          "sampler_name": "Depth",
           "bilinear": false,
           "target": "minecraft:main",
           "use_depth_buffer": true
         },
         {
-          "sampler_name": "Depth",
+          "sampler_name": "TranslucentDepth",
           "bilinear": false,
           "target": "minecraft:translucent",
           "use_depth_buffer": true
@@ -402,12 +408,12 @@
           "height": 1
         }
       ],
-      "output": "translucent_normals",
+      "output": "material2",
       "uniforms": {}
     },
     {
       "vertex_shader": "minecraft:post/initial_ray/initial_ray",
-      "fragment_shader": "minecraft:post/initial_ray/normal",
+      "fragment_shader": "minecraft:post/initial_ray/material1",
       "inputs": [
         {
           "sampler_name": "Data",
@@ -416,49 +422,21 @@
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "DataDepth",
+          "sampler_name": "Depth",
           "bilinear": false,
           "target": "minecraft:main",
           "use_depth_buffer": true
         },
         {
-          "sampler_name": "Normal",
+          "sampler_name": "TranslucentDepth",
           "bilinear": false,
-          "target": "normals",
-          "use_depth_buffer": false
+          "target": "minecraft:translucent",
+          "use_depth_buffer": true
         },
         {
-          "sampler_name": "Atlas",
+          "sampler_name": "MainDepth",
           "bilinear": false,
-          "location": "minecraft:atlas",
-          "width": 1,
-          "height": 1
-        },
-        {
-          "sampler_name": "ModelData",
-          "bilinear": false,
-          "location": "minecraft:model_data",
-          "width": 1,
-          "height": 1
-        }
-      ],
-      "output": "material_normal",
-      "uniforms": {}
-    },
-    {
-      "vertex_shader": "minecraft:post/initial_ray/initial_ray",
-      "fragment_shader": "minecraft:post/initial_ray/specular",
-      "inputs": [
-        {
-          "sampler_name": "Data",
-          "bilinear": false,
-          "target": "minecraft:main",
-          "use_depth_buffer": false
-        },
-        {
-          "sampler_name": "DataDepth",
-          "bilinear": false,
-          "target": "minecraft:main",
+          "target": "minecraft:translucent",
           "use_depth_buffer": true
         },
         {
@@ -476,7 +454,7 @@
           "height": 1
         }
       ],
-      "output": "material_specular",
+      "output": "translucent_material1",
       "uniforms": {}
     },
     {
@@ -490,7 +468,7 @@
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "DataDepth",
+          "sampler_name": "Depth",
           "bilinear": false,
           "target": "minecraft:main",
           "use_depth_buffer": true
@@ -516,15 +494,15 @@
           "height": 1
         },
         {
-          "sampler_name": "MaterialNormal",
+          "sampler_name": "Material1",
           "bilinear": false,
-          "target": "material_normal",
+          "target": "material1",
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "MaterialSpecular",
+          "sampler_name": "Material2",
           "bilinear": false,
-          "target": "material_specular",
+          "target": "material2",
           "use_depth_buffer": false
         }
       ],
@@ -620,15 +598,27 @@
           "use_depth_buffer": true
         },
         {
-          "sampler_name": "MaterialNormal",
+          "sampler_name": "Material1",
           "bilinear": false,
-          "target": "material_normal",
+          "target": "material1",
           "use_depth_buffer": false
         },
         {
-          "sampler_name": "MaterialSpecular",
+          "sampler_name": "Material2",
           "bilinear": false,
-          "target": "material_specular",
+          "target": "material2",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "TranslucentMaterial1",
+          "bilinear": false,
+          "target": "translucent_material1",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "TranslucentMaterial2",
+          "bilinear": false,
+          "target": "translucent_material2",
           "use_depth_buffer": false
         }
       ],
