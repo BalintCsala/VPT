@@ -354,9 +354,9 @@ async function generateMultipart(
       // prettier-ignore
       if (
         !part.when ||
-        (Object.hasOwn(part.when, "AND") && (part.when as AndCondition).AND.every((condition) => isConditionFulfilled(combination, condition))) ||
-        (Object.hasOwn(part.when, "OR") && (part.when as OrCondition).OR.some((condition) => isConditionFulfilled(combination, condition))) ||
-        isConditionFulfilled(combination, part.when as Condition)
+        ("AND" in part.when && typeof part.when.AND == "object" && part.when.AND.every((condition) => isConditionFulfilled(combination, condition))) ||
+        ("OR" in part.when && typeof part.when.OR == "object" && part.when.OR.some((condition) => isConditionFulfilled(combination, condition))) ||
+        (!("AND" in part.when || "OR" in part.when) && isConditionFulfilled(combination, part.when))
       ) {
         modelInfos.push(Array.isArray(part.apply) ? part.apply[0] : part.apply);
       }
@@ -383,7 +383,7 @@ async function generateMultipart(
     });
 
     if (faces.length == 0) {
-      return [];
+      continue;
     }
 
     generatedModelData.push(packModel(faces));

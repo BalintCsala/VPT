@@ -54,21 +54,21 @@ Intersection intersectModel(sampler2D modelDataSampler, sampler2D atlasSampler, 
     Intersection intersection = noIntersection();
     intersection.voxelPos = voxelPos;
     for (int i = 0; i < faceCount; i++) {
-        int faceOffset = PIXELS_PER_FACE * i;
+        int faceOffset = PIXELS_PER_FACE * i + 1;
         vec3 position = vec3(
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 2, modelId), 0)),
                 decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 3, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 4, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 5, modelId), 0))
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 4, modelId), 0))
             ) + vec3(voxelPos);
         vec3 sideX = vec3(
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 5, modelId), 0)),
                 decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 6, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 7, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 8, modelId), 0))
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 7, modelId), 0))
             );
         vec3 sideY = vec3(
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 8, modelId), 0)),
                 decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 9, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 10, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 11, modelId), 0))
+                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 10, modelId), 0))
             );
 
         vec3 tangent = normalize(sideX);
@@ -93,23 +93,25 @@ Intersection intersectModel(sampler2D modelDataSampler, sampler2D atlasSampler, 
             continue;
         }
 
-        vec2 uvStart = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 1, modelId), 0));
-        vec2 uvEnd = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 2, modelId), 0));
+        uint flags = uint(texelFetch(modelDataSampler, ivec2(faceOffset + 11, modelId), 0).r * 255.0);
+        bool tintable = (flags & 1u) == 1u;
+        bool cutout = (flags & 2u) == 2u;
+
+        vec2 uvStart = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset, modelId), 0));
+        vec2 uvEnd = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 1, modelId), 0));
         ivec2 faceUV = ivec2(floor(mix(uvStart, uvEnd, uv)));
 
         vec4 albedo = texelFetch(atlasSampler, faceUV, 0);
-        if (albedo.a < 0.1) {
+        if (cutout && albedo.a < 0.1) {
             continue;
         }
-
-        uint flags = uint(texelFetch(modelDataSampler, ivec2(faceOffset + 12, modelId), 0).r * 255.0);
 
         intersection.hit = true;
         intersection.t = t;
         intersection.uv = faceUV;
         intersection.albedo = albedo;
         intersection.tbn = mat3(tangent, -bitangent, normal);
-        intersection.tintable = (flags & 1u) == 1u;
+        intersection.tintable = tintable;
     }
 
     return intersection;

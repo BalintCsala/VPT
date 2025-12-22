@@ -1,5 +1,0 @@
-
-> vpt@1.0.0 assets
-> node --experimental-strip-types src/assets/main.ts ./data/VNR.zip
-
-Downloading 1.21.11.jar...

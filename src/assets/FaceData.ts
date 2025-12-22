@@ -130,41 +130,50 @@ export function getModelFaces(
         ),
         elementTransform,
       );
+      const angle = (element.rotation.angle / 180) * Math.PI;
+      let rescale = vec3.fromValues(1, 1, 1);
+      let scaleAmount = 1 / Math.cos(angle);
+
       switch (element.rotation.axis) {
         case "x": {
           mat4.multiply(
             elementTransform,
-            mat4.fromXRotation(
-              mat4.create(),
-              (element.rotation.angle / 180) * Math.PI,
-            ),
+            mat4.fromXRotation(mat4.create(), angle),
             elementTransform,
           );
+          if (element.rotation.rescale) {
+            rescale = vec3.fromValues(1, scaleAmount, scaleAmount);
+          }
           break;
         }
         case "y": {
           mat4.multiply(
             elementTransform,
-            mat4.fromYRotation(
-              mat4.create(),
-              -(element.rotation.angle / 180) * Math.PI,
-            ),
+            mat4.fromYRotation(mat4.create(), -angle),
             elementTransform,
           );
+          if (element.rotation.rescale) {
+            rescale = vec3.fromValues(scaleAmount, 1, scaleAmount);
+          }
           break;
         }
         case "z": {
           mat4.multiply(
             elementTransform,
-            mat4.fromZRotation(
-              mat4.create(),
-              (element.rotation.angle / 180) * Math.PI,
-            ),
+            mat4.fromZRotation(mat4.create(), angle),
             elementTransform,
           );
+          if (element.rotation.rescale) {
+            rescale = vec3.fromValues(scaleAmount, scaleAmount, 1);
+          }
           break;
         }
       }
+      mat4.multiply(
+        elementTransform,
+        mat4.fromScaling(mat4.create(), rescale),
+        elementTransform,
+      );
       mat4.multiply(
         elementTransform,
         mat4.fromTranslation(
@@ -272,11 +281,11 @@ export function getModelFaces(
 export function packFace(face: Face) {
   // prettier-ignore
   const bytesPerFace = Math.ceil((
-        Uint16Array.BYTES_PER_ELEMENT * 4 + // uv
+        Uint16Array.BYTES_PER_ELEMENT * 4 +  // uv
         Float32Array.BYTES_PER_ELEMENT * 3 + // position
         Float32Array.BYTES_PER_ELEMENT * 3 + // tangent
         Float32Array.BYTES_PER_ELEMENT * 3 + // bitangent
-        Uint8Array.BYTES_PER_ELEMENT * 4 // tintable + cutout
+        Uint8Array.BYTES_PER_ELEMENT * 4     // tintable + cutout
     ) / 4) * 4;
   const data = new ArrayBuffer(bytesPerFace);
   const uvView = new Uint16Array(data, 0, 4);

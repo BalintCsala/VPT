@@ -15,7 +15,6 @@ import {
 import fs from "fs/promises";
 import { generateSettingsFile } from "./lib/settings.ts";
 import { applyBloom } from "./bloom/Bloom.ts";
-import { truncateSync } from "fs";
 
 // Assuming some crazy person runs the shader on a super ultrawide 2x4k screen
 const MAX_WIDTH = 7920;
