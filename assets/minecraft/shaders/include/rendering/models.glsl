@@ -7,8 +7,6 @@
 #moj_import <minecraft:math/quaternions.glsl>
 #moj_import <minecraft:utilities/float_storage.glsl>
 
-const int PIXELS_PER_FACE = 12;
-
 uint parseModelIdFromData(vec4 data) {
     return packUnorm4x8(vec4(data.rgb, 0.0));
 }
@@ -54,31 +52,36 @@ Intersection intersectModel(sampler2D modelDataSampler, sampler2D atlasSampler, 
     Intersection intersection = noIntersection();
     intersection.voxelPos = voxelPos;
     for (int i = 0; i < faceCount; i++) {
-        int faceOffset = PIXELS_PER_FACE * i + 1;
-        vec3 position = vec3(
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 2, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 3, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 4, modelId), 0))
-            ) + vec3(voxelPos);
-        vec3 sideX = vec3(
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 5, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 6, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 7, modelId), 0))
-            );
-        vec3 sideY = vec3(
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 8, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 9, modelId), 0)),
-                decodeFloat(texelFetch(modelDataSampler, ivec2(faceOffset + 10, modelId), 0))
-            );
+        int faceOffset = i * 7 + 1;
+        uint val0 = packUnorm4x8(texelFetch(modelDataSampler, ivec2(faceOffset + 0, modelId), 0));
+        uint val1 = packUnorm4x8(texelFetch(modelDataSampler, ivec2(faceOffset + 1, modelId), 0));
+        uint val2 = packUnorm4x8(texelFetch(modelDataSampler, ivec2(faceOffset + 2, modelId), 0));
+        uint val3 = packUnorm4x8(texelFetch(modelDataSampler, ivec2(faceOffset + 3, modelId), 0));
+        uint val4 = packUnorm4x8(texelFetch(modelDataSampler, ivec2(faceOffset + 4, modelId), 0));
+
+        vec3 position;
+        vec3 sideX;
+        vec3 sideY;
+        position.xy = unpackHalf2x16(val0);
+        vec2 tmp = unpackHalf2x16(val1);
+        position.z = tmp.x;
+        sideX.x = tmp.y;
+        sideX.yz = unpackHalf2x16(val2);
+        sideY.xy = unpackHalf2x16(val3);
+        sideY.z = unpackHalf2x16(val4).x;
+
+        position += vec3(voxelPos);
 
         vec3 tangent = normalize(sideX);
         vec3 bitangent = normalize(sideY);
         vec3 normal = cross(tangent, bitangent);
-        if (dot(normal, ray.direction) >= 0.0) {
+
+        float NdotD = dot(normal, ray.direction);
+        if (NdotD >= 0.0) {
             continue;
         }
 
-        float t = dot(position - ray.origin, normal) / dot(ray.direction, normal);
+        float t = dot(position - ray.origin, normal) / NdotD;
         if (t < 0.0 || (intersection.t > 0.0 && t > intersection.t)) {
             continue;
         }
@@ -93,12 +96,12 @@ Intersection intersectModel(sampler2D modelDataSampler, sampler2D atlasSampler, 
             continue;
         }
 
-        uint flags = uint(texelFetch(modelDataSampler, ivec2(faceOffset + 11, modelId), 0).r * 255.0);
+        uint flags = (val4 >> 16u) & 255u;
         bool tintable = (flags & 1u) == 1u;
         bool cutout = (flags & 2u) == 2u;
 
-        vec2 uvStart = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset, modelId), 0));
-        vec2 uvEnd = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 1, modelId), 0));
+        vec2 uvStart = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 5, modelId), 0));
+        vec2 uvEnd = unpackUV(texelFetch(modelDataSampler, ivec2(faceOffset + 6, modelId), 0));
         ivec2 faceUV = ivec2(floor(mix(uvStart, uvEnd, uv)));
 
         vec4 albedo = texelFetch(atlasSampler, faceUV, 0);

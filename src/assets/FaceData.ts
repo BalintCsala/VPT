@@ -6,8 +6,8 @@ import { sanitizeReference } from "./sanitization.ts";
 type Face = {
   uv: [number, number, number, number];
   position: [number, number, number];
-  tangent: [number, number, number];
-  bitangent: [number, number, number];
+  sideX: [number, number, number];
+  sideY: [number, number, number];
   tintable: boolean;
   cutout: boolean;
 };
@@ -223,9 +223,9 @@ export function getModelFaces(
       vec3.transformMat4(base, rawFacePosition.base, totalTransform);
       vec3.transformMat4(posX, rawFacePosition.posX, totalTransform);
       vec3.transformMat4(posY, rawFacePosition.posY, totalTransform);
-      const tangent = vec3.sub(vec3.create(), posX, base);
-      const bitangent = vec3.sub(vec3.create(), posY, base);
-      if (vec3.len(tangent) < 0.001 || vec3.len(bitangent) < 0.001) {
+      const sideX = vec3.sub(vec3.create(), posX, base);
+      const sideY = vec3.sub(vec3.create(), posY, base);
+      if (vec3.len(sideX) < 0.001 || vec3.len(sideY) < 0.001) {
         // Face is too small to matter
         continue;
       }
@@ -260,8 +260,8 @@ export function getModelFaces(
 
       elementFaces.push({
         position: [...base] as [number, number, number],
-        tangent: [...tangent] as [number, number, number],
-        bitangent: [...bitangent] as [number, number, number],
+        sideX: [...sideX] as [number, number, number],
+        sideY: [...sideY] as [number, number, number],
         uv: [
           textureLocation.x + textureLocation.size * (uv[0] / 16),
           textureLocation.y + textureLocation.size * (uv[3] / 16),
@@ -280,42 +280,46 @@ export function getModelFaces(
 
 export function packFace(face: Face) {
   // prettier-ignore
-  const bytesPerFace = Math.ceil((
-        Uint16Array.BYTES_PER_ELEMENT * 4 +  // uv
-        Float32Array.BYTES_PER_ELEMENT * 3 + // position
-        Float32Array.BYTES_PER_ELEMENT * 3 + // tangent
-        Float32Array.BYTES_PER_ELEMENT * 3 + // bitangent
-        Uint8Array.BYTES_PER_ELEMENT * 4     // tintable + cutout
-    ) / 4) * 4;
-  const data = new ArrayBuffer(bytesPerFace);
-  const uvView = new Uint16Array(data, 0, 4);
-  const positionView = new Float32Array(
-    data,
-    uvView.byteOffset + uvView.byteLength,
-    3,
-  );
-  const tangentView = new Float32Array(
-    data,
+  const bytesPerFace =
+    Math.ceil((
+      Float16Array.BYTES_PER_ELEMENT * 3 + // position
+      Float16Array.BYTES_PER_ELEMENT * 3 + // side x
+      Float16Array.BYTES_PER_ELEMENT * 3 + // side y
+      Uint16Array.BYTES_PER_ELEMENT +      // flags
+      Uint16Array.BYTES_PER_ELEMENT * 4    // uv
+    ) /  4) * 4;
+  const data = new Uint8Array(bytesPerFace);
+  const positionView = new Float16Array(data.buffer, 0, 3);
+  const sideXView = new Float16Array(
+    data.buffer,
     positionView.byteOffset + positionView.byteLength,
     3,
   );
-  const bitangentView = new Float32Array(
-    data,
-    tangentView.byteOffset + tangentView.byteLength,
+  const sideYView = new Float16Array(
+    data.buffer,
+    sideXView.byteOffset + sideXView.byteLength,
     3,
   );
-  const flagView = new Uint8Array(
-    data,
-    bitangentView.byteOffset + bitangentView.byteLength,
+  const flagView = new Uint16Array(
+    data.buffer,
+    sideYView.byteOffset + sideYView.byteLength,
+    1,
+  );
+  const uvView = new Uint16Array(
+    data.buffer,
+    flagView.byteOffset + flagView.byteLength,
     4,
   );
 
-  uvView.set(face.uv);
   positionView.set(face.position);
-  tangentView.set(face.tangent);
-  bitangentView.set(face.bitangent);
-  flagView.set([(face.cutout ? 2 : 0) | (face.tintable ? 1 : 0), 0, 0, 255]);
-  return new Uint8Array(data);
+  sideXView.set(face.sideX);
+  sideYView.set(face.sideY);
+
+  flagView.set([(face.cutout ? 2 : 0) | (face.tintable ? 1 : 0)]);
+
+  uvView.set(face.uv);
+
+  return data;
 }
 
 export function packModel(faces: Face[]) {

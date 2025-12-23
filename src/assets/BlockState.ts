@@ -15,6 +15,7 @@ type ModelInfo = {
 
 type WeightedModelInfo = ModelInfo & {
   weight?: number;
+  model: string;
 };
 
 type Condition = {
@@ -351,6 +352,20 @@ async function generateMultipart(
 
     const modelInfos: ModelInfo[] = [];
     multipart.forEach((part) => {
+      const partModelInfo = Array.isArray(part.apply)
+        ? part.apply[0]
+        : part.apply;
+      const model = models.get(sanitizeReference(partModelInfo.model));
+      if (!model) {
+        throw new Error(
+          `Could not find model ${sanitizeReference(partModelInfo.model)} in blockstate ${blockstateName}`,
+        );
+      }
+      removeShading(model);
+      zip.file(
+        `assets/minecraft/models/block/${sanitizeReference(partModelInfo.model)}.json`,
+        JSON.stringify(model, null, 4),
+      );
       // prettier-ignore
       if (
         !part.when ||
@@ -358,7 +373,7 @@ async function generateMultipart(
         ("OR" in part.when && typeof part.when.OR == "object" && part.when.OR.some((condition) => isConditionFulfilled(combination, condition))) ||
         (!("AND" in part.when || "OR" in part.when) && isConditionFulfilled(combination, part.when))
       ) {
-        modelInfos.push(Array.isArray(part.apply) ? part.apply[0] : part.apply);
+        modelInfos.push(partModelInfo);
       }
     });
 
