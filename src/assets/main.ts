@@ -30,15 +30,53 @@ const RESOURCEPACK_FOLDERS = [
   "assets/minecraft/textures/trims",
 ];
 
+function printHelp() {
+  // prettier-ignore
+  {
+    console.log("Usage:");
+    console.log("    npm run assets -- <resourcepack location> [-d | --debug] [-d | --output-dir <directory>]");
+    console.log(`      -o, --output-dir    The directory where the converted resourcepack should go (default = "./out")`);
+    console.log("      -d, --debug         Enable debugging (verbose output, generate id list, etc.) (default = off)");
+    console.log("      -h, --help          Print this dialog");
+  }
+}
+
 async function main() {
+  if (process.argv.length < 3) {
+    printHelp();
+    return;
+  }
+
+  let outputDirectory = "./out";
+  let debug = false;
+  const resourcepackPath = process.argv[2];
+
+  for (let i = 3; i < process.argv.length; i++) {
+    switch (process.argv[i]) {
+      case "--help":
+      case "-h":
+        printHelp();
+        return;
+      case "--debug":
+      case "-d":
+        debug = true;
+        break;
+      case "--output-dir":
+      case "-o":
+        outputDirectory = process.argv[i + 1];
+        i++;
+        break;
+    }
+  }
+
   console.log(`Downloading ${CURRENT_VERSION}.jar...`);
 
   const versionManifest = (await fetch(VERSION_MANIFEST_URL).then((res) =>
-    res.json(),
+    res.json()
   )) as VersionManifest;
 
   const versionData = versionManifest.versions.find(
-    (version) => version.id == CURRENT_VERSION,
+    (version) => version.id == CURRENT_VERSION
   );
   if (!versionData) {
     console.log(`Failed to find version ${CURRENT_VERSION}`);
@@ -46,7 +84,7 @@ async function main() {
   }
 
   const version = (await fetch(versionData.url).then((res) =>
-    res.json(),
+    res.json()
   )) as Version;
   if (!version) {
     console.log(`Failed to load version data for ${CURRENT_VERSION}`);
@@ -54,10 +92,9 @@ async function main() {
   }
 
   const clientJar = await JSZip.loadAsync(
-    await fetch(version.downloads.client.url).then((res) => res.arrayBuffer()),
+    await fetch(version.downloads.client.url).then((res) => res.arrayBuffer())
   );
 
-  const resourcepackPath = process.argv[2];
   console.log(`Loading in resourcepack from ${resourcepackPath}`);
   const resourcepackJar = await JSZip.loadAsync(fs.readFile(resourcepackPath));
 
@@ -71,7 +108,7 @@ async function main() {
   }
 
   for (const path in resourcepackJar.files) {
-    const file = await resourcepackJar.file(path);
+    const file = resourcepackJar.file(path);
     if (!file) {
       // Folder or invalid
       continue;
@@ -86,13 +123,29 @@ async function main() {
   const atlas = await generateAtlas(pack);
 
   console.log("Generating block assets");
-  await generateAssets(pack, models, atlas.textureLocations);
+  await generateAssets(
+    pack,
+    models,
+    atlas.textureLocations,
+    outputDirectory,
+    debug
+  );
 
+  console.log("Creating zip");
   const resourcePath = path.parse(resourcepackPath);
-
+  try {
+    await fs.mkdir(outputDirectory, { recursive: true });
+  } catch (ex) {
+    // Folder already exists
+  }
+  const outputLocation = `${outputDirectory}/${resourcePath.name}-VPT-compatible.zip`;
   fs.writeFile(
-    `./out/${resourcePath.name}-VPT-edit.zip`,
-    await pack.generateAsync({ type: "nodebuffer" }),
+    outputLocation,
+    await pack.generateAsync({ type: "nodebuffer" })
+  );
+
+  console.log(
+    `Success, the converted resourcepack was placed in ${outputLocation}`
   );
 }
 

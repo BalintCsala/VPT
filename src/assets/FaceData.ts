@@ -59,7 +59,7 @@ export function getModelFaces(
   model: Model,
   textureLocations: Map<string, TextureLocation>,
   x?: Rotation,
-  y?: Rotation,
+  y?: Rotation
 ) {
   if (!model.elements) {
     return [];
@@ -70,34 +70,34 @@ export function getModelFaces(
     mat4.multiply(
       modelTransform,
       mat4.fromTranslation(mat4.create(), [-0.5, -0.5, -0.5]),
-      modelTransform,
+      modelTransform
     );
     mat4.multiply(
       modelTransform,
       mat4.fromXRotation(mat4.create(), -(x / 180) * Math.PI),
-      modelTransform,
+      modelTransform
     );
     mat4.multiply(
       modelTransform,
       mat4.fromTranslation(mat4.create(), [0.5, 0.5, 0.5]),
-      modelTransform,
+      modelTransform
     );
   }
   if (y) {
     mat4.multiply(
       modelTransform,
       mat4.fromTranslation(mat4.create(), [-0.5, -0.5, -0.5]),
-      modelTransform,
+      modelTransform
     );
     mat4.multiply(
       modelTransform,
       mat4.fromYRotation(mat4.create(), -(y / 180) * Math.PI),
-      modelTransform,
+      modelTransform
     );
     mat4.multiply(
       modelTransform,
       mat4.fromTranslation(mat4.create(), [0.5, 0.5, 0.5]),
-      modelTransform,
+      modelTransform
     );
   }
 
@@ -113,12 +113,12 @@ export function getModelFaces(
     mat4.multiply(
       elementTransform,
       mat4.fromScaling(mat4.create(), size),
-      elementTransform,
+      elementTransform
     );
     mat4.multiply(
       elementTransform,
       mat4.fromTranslation(mat4.create(), start),
-      elementTransform,
+      elementTransform
     );
 
     if (element.rotation) {
@@ -126,9 +126,9 @@ export function getModelFaces(
         elementTransform,
         mat4.fromTranslation(
           mat4.create(),
-          vec3.scale(vec3.create(), element.rotation.origin, -1 / 16),
+          vec3.scale(vec3.create(), element.rotation.origin, -1 / 16)
         ),
-        elementTransform,
+        elementTransform
       );
       const angle = (element.rotation.angle / 180) * Math.PI;
       let rescale = vec3.fromValues(1, 1, 1);
@@ -139,7 +139,7 @@ export function getModelFaces(
           mat4.multiply(
             elementTransform,
             mat4.fromXRotation(mat4.create(), angle),
-            elementTransform,
+            elementTransform
           );
           if (element.rotation.rescale) {
             rescale = vec3.fromValues(1, scaleAmount, scaleAmount);
@@ -150,7 +150,7 @@ export function getModelFaces(
           mat4.multiply(
             elementTransform,
             mat4.fromYRotation(mat4.create(), -angle),
-            elementTransform,
+            elementTransform
           );
           if (element.rotation.rescale) {
             rescale = vec3.fromValues(scaleAmount, 1, scaleAmount);
@@ -161,7 +161,7 @@ export function getModelFaces(
           mat4.multiply(
             elementTransform,
             mat4.fromZRotation(mat4.create(), angle),
-            elementTransform,
+            elementTransform
           );
           if (element.rotation.rescale) {
             rescale = vec3.fromValues(scaleAmount, scaleAmount, 1);
@@ -172,15 +172,15 @@ export function getModelFaces(
       mat4.multiply(
         elementTransform,
         mat4.fromScaling(mat4.create(), rescale),
-        elementTransform,
+        elementTransform
       );
       mat4.multiply(
         elementTransform,
         mat4.fromTranslation(
           mat4.create(),
-          vec3.scale(vec3.create(), element.rotation.origin, 1 / 16),
+          vec3.scale(vec3.create(), element.rotation.origin, 1 / 16)
         ),
-        elementTransform,
+        elementTransform
       );
     }
 
@@ -195,21 +195,21 @@ export function getModelFaces(
         mat4.multiply(
           faceTransform,
           mat4.fromTranslation(mat4.create(), [-0.5, -0.5, -0.5]),
-          faceTransform,
+          faceTransform
         );
         mat4.multiply(
           faceTransform,
           mat4.fromRotation(
             mat4.create(),
             -(faceData.rotation / 180) * Math.PI,
-            FACE_NORMALS[faceDirection],
+            FACE_NORMALS[faceDirection]
           ),
-          faceTransform,
+          faceTransform
         );
         mat4.multiply(
           faceTransform,
           mat4.fromTranslation(mat4.create(), [0.5, 0.5, 0.5]),
-          faceTransform,
+          faceTransform
         );
       }
 
@@ -235,7 +235,7 @@ export function getModelFaces(
         const textureName = model.textures[textureReference.substring(1)];
         if (!textureName) {
           console.log(
-            `Texture reference "${faceData.texture}" cannot be evaluated in model "${modelName}"`,
+            `Texture reference "${faceData.texture}" cannot be evaluated in model "${modelName}"`
           );
           textureReference = "block/missingno";
           break;
@@ -244,14 +244,28 @@ export function getModelFaces(
         textureReference = textureName;
       }
 
-      const textureLocation = textureLocations.get(
-        sanitizeReference(textureReference),
-      );
+      textureReference = sanitizeReference(textureReference);
+      if (!textureLocations.has(textureReference)) {
+        // Special case, in heavy_core the texture reference doesn't start with #
+        let textureName = sanitizeReference(model.textures[textureReference]);
+        if (textureName == null) {
+          console.log(
+            `Failed to find texture reference "${faceData.texture}" in model "${modelName}"`
+          );
+          continue;
+        }
+
+        textureReference = textureName;
+      }
+
+      const ref = textureReference;
+      let textureLocation = textureLocations.get(ref);
+
       if (!textureLocation) {
         if (faceData.texture != "#missingno") {
           // Special case, since this gets reported earlier
           console.log(
-            `Failed to find texture reference "${faceData.texture}" in model "${modelName}"`,
+            `Failed to find texture reference "${faceData.texture}" in model "${modelName}"`
           );
         }
         continue;
@@ -293,22 +307,22 @@ export function packFace(face: Face) {
   const sideXView = new Float16Array(
     data.buffer,
     positionView.byteOffset + positionView.byteLength,
-    3,
+    3
   );
   const sideYView = new Float16Array(
     data.buffer,
     sideXView.byteOffset + sideXView.byteLength,
-    3,
+    3
   );
   const flagView = new Uint16Array(
     data.buffer,
     sideYView.byteOffset + sideYView.byteLength,
-    1,
+    1
   );
   const uvView = new Uint16Array(
     data.buffer,
     flagView.byteOffset + flagView.byteLength,
-    4,
+    4
   );
 
   positionView.set(face.position);

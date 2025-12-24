@@ -97,6 +97,7 @@ export async function parsePossibleBlockstates() {
     .split("\n");
   const possibleBlockstates = new Map<string, { [key: string]: string }[]>();
   blockstateDescriptions.forEach((blockstate) => {
+    blockstate = blockstate.trim();
     if (blockstate.indexOf("[") == -1) {
       blockstate += "[]";
     }
@@ -121,7 +122,7 @@ export async function parsePossibleBlockstates() {
   });
 
   BLOCK_STATE_IGNORE_LIST.forEach((ignored) =>
-    possibleBlockstates.delete(ignored),
+    possibleBlockstates.delete(ignored)
   );
 
   return possibleBlockstates;
@@ -161,7 +162,7 @@ function removeShading(model: Model) {
 function addDataQuadToModel(
   modelInfo: ModelInfo,
   model: Model,
-  dataTextureName: string,
+  dataTextureName: string
 ) {
   let faces = ["up", "down"] as FaceDirection[];
   if (modelInfo.x == 90) {
@@ -191,7 +192,7 @@ function addDataQuadToExistingModel(
   modelInfo: ModelInfo,
   model: Model,
   dataTextureName: string,
-  modelName: string,
+  modelName: string
 ) {
   const copy = JSON.parse(JSON.stringify(model)) as Model;
   copy.textures["__data"] = `block/${dataTextureName}`;
@@ -199,7 +200,7 @@ function addDataQuadToExistingModel(
   removeShading(copy);
   zip.file(
     `assets/minecraft/models/block/${modelName}.json`,
-    JSON.stringify(copy, null, 4),
+    JSON.stringify(copy, null, 4)
   );
 }
 
@@ -207,7 +208,7 @@ function createNewModelWithDataQuad(
   zip: JSZip,
   modelInfo: ModelInfo,
   dataTextureName: string,
-  modelName: string,
+  modelName: string
 ) {
   const model: Model = {
     textures: {},
@@ -219,7 +220,7 @@ function createNewModelWithDataQuad(
   removeShading(model);
   zip.file(
     `assets/minecraft/models/block/${modelName}.json`,
-    JSON.stringify(model, null, 4),
+    JSON.stringify(model, null, 4)
   );
 }
 
@@ -228,7 +229,7 @@ function generateAssetsForModelInfo<T extends ModelInfo>(
   variantName: string,
   models: Map<string, Model>,
   modelInfo: T,
-  modelId: number,
+  modelId: number
 ): T {
   const newModelName = `${variantName}__model_`;
   const dataTextureName = `${variantName}__data_`;
@@ -240,7 +241,7 @@ function generateAssetsForModelInfo<T extends ModelInfo>(
       modelInfo,
       model,
       dataTextureName,
-      newModelName,
+      newModelName
     );
   } else {
     createNewModelWithDataQuad(zip, modelInfo, dataTextureName, newModelName);
@@ -260,7 +261,7 @@ async function generateVariants(
   models: Map<string, Model>,
   textureLocations: Map<string, TextureLocation>,
   generatedModelData: Uint8Array[],
-  idMapping: Map<string, number>,
+  idMapping: Map<string, number>
 ) {
   let generatedModels = 0;
   for (const variant in variants) {
@@ -276,8 +277,8 @@ async function generateVariants(
       if (!model) {
         console.log(
           `Could not find model named "${sanitizeReference(
-            modelInfo.model,
-          )}" in variants "${blockstateName}"`,
+            modelInfo.model
+          )}" in variants "${blockstateName}"`
         );
         return;
       }
@@ -286,7 +287,7 @@ async function generateVariants(
         model,
         textureLocations,
         modelInfo.x,
-        modelInfo.y,
+        modelInfo.y
       );
 
       if (faces.length == 0) {
@@ -303,8 +304,8 @@ async function generateVariants(
           uniqueVariantName,
           models,
           modelInfo,
-          modelId,
-        ),
+          modelId
+        )
       );
     }
     variants[variant] = newModels;
@@ -315,7 +316,7 @@ function isConditionFulfilled(
   state: {
     [key: string]: string;
   },
-  condition: Condition,
+  condition: Condition
 ) {
   for (const key in condition) {
     if (!state[key] || condition[key].split("|").indexOf(state[key]) == -1) {
@@ -334,7 +335,7 @@ async function generateMultipart(
   textureLocations: Map<string, TextureLocation>,
   generatedModelData: Uint8Array[],
   possibleBlockstates: Map<string, { [key: string]: string }[]>,
-  idMapping: Map<string, number>,
+  idMapping: Map<string, number>
 ) {
   let generatedModels = 0;
   const combinations = possibleBlockstates.get(blockstateName);
@@ -358,13 +359,17 @@ async function generateMultipart(
       const model = models.get(sanitizeReference(partModelInfo.model));
       if (!model) {
         throw new Error(
-          `Could not find model ${sanitizeReference(partModelInfo.model)} in blockstate ${blockstateName}`,
+          `Could not find model ${sanitizeReference(
+            partModelInfo.model
+          )} in blockstate ${blockstateName}`
         );
       }
       removeShading(model);
       zip.file(
-        `assets/minecraft/models/block/${sanitizeReference(partModelInfo.model)}.json`,
-        JSON.stringify(model, null, 4),
+        `assets/minecraft/models/block/${sanitizeReference(
+          partModelInfo.model
+        )}.json`,
+        JSON.stringify(model, null, 4)
       );
       // prettier-ignore
       if (
@@ -382,8 +387,8 @@ async function generateMultipart(
       if (!model) {
         console.log(
           `Could not find model named "${sanitizeReference(
-            modelInfo.model,
-          )}" in multipart "${blockstateName}"`,
+            modelInfo.model
+          )}" in multipart "${blockstateName}"`
         );
         return [];
       }
@@ -393,7 +398,7 @@ async function generateMultipart(
         model,
         textureLocations,
         modelInfo.x,
-        modelInfo.y,
+        modelInfo.y
       );
     });
 
@@ -410,7 +415,7 @@ async function generateMultipart(
         uniqueModelName,
         models,
         { model: "" },
-        modelId,
+        modelId
       ),
     });
   }
@@ -421,6 +426,8 @@ export async function generateAssets(
   zip: JSZip,
   models: Map<string, Model>,
   textureLocations: Map<string, TextureLocation>,
+  outputDirectory: string,
+  debug: boolean
 ) {
   const folder = zip.folder("assets/minecraft/blockstates/");
   if (!folder) {
@@ -435,9 +442,15 @@ export async function generateAssets(
   const files: [string, JSZip.JSZipObject][] = [];
   folder.forEach((path, file) => files.push([path, file]));
 
+  const count = files.length;
+  let i = 0;
+  let maxLength = 0;
   for (const [path, file] of files) {
     const content = await file.async("string");
     const blockstateName = path.replace(".json", "");
+    const message = `[${++i}/${count}] ${blockstateName}`;
+    maxLength = Math.max(maxLength, message.length);
+    process.stdout.write(message.padEnd(maxLength, " ") + "\r");
 
     if (possibleBlockstates.get(blockstateName) == undefined) {
       // This blockstate was deliberately excluded, probably because it's a block entity
@@ -453,7 +466,7 @@ export async function generateAssets(
         models,
         textureLocations,
         generatedModelData,
-        idMapping,
+        idMapping
       );
     } else {
       await generateMultipart(
@@ -464,23 +477,24 @@ export async function generateAssets(
         textureLocations,
         generatedModelData,
         possibleBlockstates,
-        idMapping,
+        idMapping
       );
     }
 
     // Write the modified blockstate out
     zip.file(
       `assets/minecraft/blockstates/${path}`,
-      JSON.stringify(blockstate, null, 4),
+      JSON.stringify(blockstate, null, 4)
     );
   }
+  process.stdout.write(" ".repeat(maxLength) + "\r");
 
   const modelDataWidth = Math.max(
-    ...generatedModelData.map((modelData) => modelData.length / 4),
+    ...generatedModelData.map((modelData) => modelData.length / 4)
   );
 
   const modelDataTexture = new Uint8Array(
-    modelDataWidth * generatedModelData.length * 4,
+    modelDataWidth * generatedModelData.length * 4
   );
   generatedModelData.forEach((modelData, y) => {
     modelDataTexture.set(modelData, y * modelDataWidth * 4);
@@ -495,8 +509,15 @@ export async function generateAssets(
   });
   zip.file(`assets/minecraft/textures/effect/model_data.png`, imageData);
 
-  await fs.writeFile(
-    `./out/ids.txt`,
-    [...idMapping.entries()].map(([name, id]) => `${name} = ${id}`).join("\n"),
-  );
+  if (debug) {
+    try {
+      await fs.mkdir(outputDirectory, { recursive: true });
+    } catch (ex) {
+      // Directory exists already
+    }
+    await fs.writeFile(
+      `${outputDirectory}/ids.txt`,
+      [...idMapping.entries()].map(([name, id]) => `${name} = ${id}`).join("\n")
+    );
+  }
 }

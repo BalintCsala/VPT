@@ -52,7 +52,14 @@ export async function generateAtlas(zip: JSZip) {
     s?: DecodedPng;
     size: number;
   }[] = [];
+
+  const count = textureFiles.size;
+  let maxLength = 0;
+  let i = 0;
   for (const [name, file] of textureFiles) {
+    const message = `[${++i}/${count}] ${name}`;
+    maxLength = Math.max(maxLength, message.length);
+    process.stdout.write(message.padEnd(maxLength, " ") + "\r");
     const data = await file.async("uint8array");
     const sFile = zip.file(`assets/minecraft/textures/block/${name}_s.png`);
     const nFile = zip.file(`assets/minecraft/textures/block/${name}_n.png`);
@@ -66,6 +73,7 @@ export async function generateAtlas(zip: JSZip) {
       size: Math.min(texture.width, texture.height),
     });
   }
+  process.stdout.write(" ".repeat(maxLength) + "\r");
 
   textures = textures.sort((a, b) => (a.size > b.size ? -1 : 1));
 
