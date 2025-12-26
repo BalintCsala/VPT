@@ -247,13 +247,14 @@ export function getModelFaces(
       textureReference = sanitizeReference(textureReference);
       if (!textureLocations.has(textureReference)) {
         // Special case, in heavy_core the texture reference doesn't start with #
-        let textureName = sanitizeReference(model.textures[textureReference]);
+        let textureName = model.textures[textureReference];
         if (textureName == null) {
           console.log(
             `Failed to find texture reference "${faceData.texture}" in model "${modelName}"`
           );
           continue;
         }
+        textureName = sanitizeReference(textureName);
 
         textureReference = textureName;
       }
