@@ -13,6 +13,10 @@ struct BRDFSample {
     vec3 throughput;
 };
 
+float fresnelSchlick(float F0, float cosTheta) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 vec3 fresnelSchlick(vec3 F0, float cosTheta) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }

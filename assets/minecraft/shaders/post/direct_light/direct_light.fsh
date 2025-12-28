@@ -64,7 +64,7 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
     float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
 
-    vec3 radiance = 0.05 * albedo * (1.0 - material.metallic) + material.emission;
+    vec3 radiance = 0.05 * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
     if (NdotL > 0.001) {
         vec3 intensity = lightIntensity;
         if (sunInfo >= 2.0) {

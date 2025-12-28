@@ -9,6 +9,7 @@
 #moj_import <minecraft:math/constants.glsl>
 #moj_import <minecraft:rendering/raytrace.glsl>
 #moj_import <minecraft:rendering/pbr/material.glsl>
+#moj_import <minecraft:rendering/atmosphere.glsl>
 
 const vec3 WATER_EXTINCTION_COEFF = vec3(1.2340e-8, 2.1344e-9, 9.724e-10) * 4.0 * PI / RGB_WAVELENGTHS;
 const float WATER_IOR = 1.333;
@@ -118,7 +119,7 @@ void main() {
             deriv += componentDeriv;
             weight += scale;
         }
-        deriv *= 5.0 / 16.0;
+        deriv *= 0.4 / 16.0;
 
         normal = cross(vec3(0, deriv.y, 1), vec3(1, deriv.x, 0));
         vec3 viewDir = normalize(fragmentPos);
@@ -131,107 +132,107 @@ void main() {
 
     vec3 sunDir = normalize(sunDirection);
 
+    vec3 radiance = vec3(0, 0, 0);
+    float fresnel = fresnelSchlick(0.02, clamp(dot(normal, viewDir), 0.0, 1.0));
+
     vec3 refractedDir = refract(-viewDir, normal, 1.0 / WATER_IOR);
     refractedDir = normalize(mix(-viewDir, refractedDir, REFRACTION_FUDGE_FACTOR));
-    Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), refractedDir);
 
-    vec4 startClipPos = playerToClip(projMat, viewMat, fragmentPos);
-    vec3 startScreenPos = startClipPos.xyz / startClipPos.w * 0.5 + 0.5;
+    {
+        Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), refractedDir);
 
-    Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+        vec4 startClipPos = playerToClip(projMat, viewMat, fragmentPos);
+        vec3 startScreenPos = startClipPos.xyz / startClipPos.w * 0.5 + 0.5;
 
-    float dist;
-    if (intersection.hit) {
-        dist = intersection.t;
-    } else {
-        dist = distInWater;
-    }
+        Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
 
-    vec3 endPos = fragmentPos + refractedDir * dist;
-    vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
-    bool endPosInside = clamp(endClipPos.xyz, -endClipPos.w, endClipPos.w) == endClipPos.xyz;
-    vec3 endScreenPos = endClipPos.xyz / endClipPos.w * 0.5 + 0.5;
+        float dist;
+        if (intersection.hit) {
+            dist = intersection.t;
+        } else {
+            dist = distInWater;
+        }
 
-    bool foundHit = false;
-    Material material;
-    if (endPosInside) {
-        vec3 rtStep = (endScreenPos - startScreenPos) / float(SSRT_STEPS - 1);
-        vec3 pos = startScreenPos + rtStep * randFloat(randState);
+        if (!topFace) {
+            // Limit absorption for vertical faces as these are normally "waterfalls"
+            dist = min(dist, 1.4);
+        }
+        vec3 throughput = exp(-dist * WATER_EXTINCTION_COEFF);
 
-        for (int i = 0; i < SSRT_STEPS; i++) {
-            float depth = textureLod(DepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
-            float translucentDepth = textureLod(TranslucentDepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
-            if (translucentDepth == depth) {
-                // Ray went outside of the water area, can't do anything from here
-                break;
-            }
+        vec3 endPos = fragmentPos + refractedDir * dist;
+        vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
+        bool endPosInside = clamp(endClipPos.xyz, -endClipPos.w, endClipPos.w) == endClipPos.xyz;
+        vec3 endScreenPos = endClipPos.xyz / endClipPos.w * 0.5 + 0.5;
 
-            if (depth < pos.z) {
-                vec4 baseColor = textureLod(DataSampler, pos.xy * vec2(0.5, 1.0), 0.0);
-                if (abs(baseColor.a - ENTITY_MASK) < 0.5 / 255.0) {
-                    vec3 viewPos = screenToView(projMatInv, vec3(pos.xy, depth));
-                    viewPos.z -= SSRT_THICKNESS;
-                    vec3 screenPos = viewToScreen(projMat, viewPos);
-                    if (pos.z < screenPos.z) {
-                        endPos = (viewMatInv * vec4(viewPos, 1.0)).xyz;
-                        dist = distance(fragmentPos, endPos);
-                        foundHit = true;
-                        material = decodeScreenMaterial(
-                                srgbToLinear(baseColor.rgb),
-                                textureLod(Material1Sampler, pos.xy, 0.0),
-                                textureLod(Material2Sampler, pos.xy, 0.0)
-                            );
-                        break;
+        bool foundHit = false;
+        Material material;
+        if (endPosInside) {
+            vec3 rtStep = (endScreenPos - startScreenPos) / float(SSRT_STEPS - 1);
+            vec3 pos = startScreenPos + rtStep * randFloat(randState);
+
+            for (int i = 0; i < SSRT_STEPS; i++) {
+                float depth = textureLod(DepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
+                float translucentDepth = textureLod(TranslucentDepthSampler, pos.xy * vec2(0.5, 1.0), 0.0).r;
+                if (translucentDepth == depth) {
+                    // Ray went outside of the water area, can't do anything from here
+                    break;
+                }
+
+                if (depth < pos.z) {
+                    vec4 baseColor = textureLod(DataSampler, pos.xy * vec2(0.5, 1.0), 0.0);
+                    if (abs(baseColor.a - ENTITY_MASK) < 0.5 / 255.0) {
+                        vec3 viewPos = screenToView(projMatInv, vec3(pos.xy, depth));
+                        viewPos.z -= SSRT_THICKNESS;
+                        vec3 screenPos = viewToScreen(projMat, viewPos);
+                        if (pos.z < screenPos.z) {
+                            endPos = (viewMatInv * vec4(viewPos, 1.0)).xyz;
+                            dist = distance(fragmentPos, endPos);
+                            foundHit = true;
+                            material = decodeScreenMaterial(
+                                    srgbToLinear(baseColor.rgb),
+                                    textureLod(Material1Sampler, pos.xy, 0.0),
+                                    textureLod(Material2Sampler, pos.xy, 0.0)
+                                );
+                            break;
+                        }
                     }
                 }
+
+                pos += rtStep;
             }
-
-            pos += rtStep;
         }
-    }
 
-    if (!foundHit) {
-        if (intersection.hit) {
-            material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
-        } else if (endPosInside && abs(1.0 / (1.005 - endScreenPos.z) - 1.0 / (1.005 - textureLod(DepthSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).r)) < 15.0) {
-            material = decodeScreenMaterial(
-                    srgbToLinear(textureLod(DataSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).rgb),
-                    textureLod(Material1Sampler, endScreenPos.xy, 0.0),
-                    textureLod(Material2Sampler, endScreenPos.xy, 0.0)
-                );
+        if (!foundHit) {
+            if (intersection.hit) {
+                material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
+            } else if (endPosInside && abs(1.0 / (1.005 - endScreenPos.z) - 1.0 / (1.005 - textureLod(DepthSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).r)) < 15.0) {
+                material = decodeScreenMaterial(
+                        srgbToLinear(textureLod(DataSampler, endScreenPos.xy * vec2(0.5, 1.0), 0.0).rgb),
+                        textureLod(Material1Sampler, endScreenPos.xy, 0.0),
+                        textureLod(Material2Sampler, endScreenPos.xy, 0.0)
+                    );
+            } else {
+                // Nothing to fall back to
+                material = Material(vec3(0.0), vec3(0.0), 1.0, 0.0, 0.0, vec3(0, 0, 0), vec3(0, 0, 0));
+            }
+        }
+
+        if (solidDepth == 1.0) {
+            // Sky behind water
+            radiance += throughput * decodeHDR(textureLod(SolidSampler, texCoord, 0.0)) * (1.0 - fresnel);
+            dist = min(dist, 1.4);
         } else {
-            // Nothing to fall back to
-            material = Material(vec3(0.0), vec3(0.0), 1.0, 0.0, 0.0, vec3(0, 0, 0), vec3(0, 0, 0));
-        }
-    }
-
-    vec3 radiance = vec3(0, 0, 0);
-    if (solidDepth == 1.0) {
-        // Sky behind water
-        radiance = decodeHDR(textureLod(SolidSampler, texCoord, 0.0));
-        dist = min(dist, 1.4);
-    } else {
-        radiance = material.emission + 0.05 * material.albedo * (1.0 - material.metallic);
-        float NdotL = dot(material.normal, sunDir);
-        if (NdotL > 0.001) {
-            Ray sunRay = Ray(intersection.voxelPos, endPos - fract(CameraOffset), sunDir);
-            Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
-            if (!sunIntersection.hit) {
-                radiance += brdf(material, material.normal, -refractedDir, sunDir, NdotL) * lightIntensity * NdotL;
+            radiance += throughput * (material.emission + 0.05 * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion) * (1.0 - fresnel);
+            float NdotL = dot(material.normal, sunDir);
+            if (NdotL > 0.001) {
+                Ray sunRay = Ray(intersection.voxelPos, endPos - fract(CameraOffset), sunDir);
+                Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
+                if (!sunIntersection.hit) {
+                    radiance += throughput * brdf(material, material.normal, -refractedDir, sunDir, NdotL) * lightIntensity * NdotL * (1.0 - fresnel);
+                }
             }
         }
     }
-
-    if (!topFace) {
-        // Limit absorption for vertical faces as these are normally on "waterfalls"
-        dist = min(dist, 1.4);
-    }
-
-    if (dist < 0.0) {
-        fragColor = encodeHDR(vec3(1, 0, 0));
-        return;
-    }
-    radiance *= exp(-dist * WATER_EXTINCTION_COEFF);
 
     Material waterMaterial = Material(
             vec3(0.0),
@@ -244,10 +245,30 @@ void main() {
         );
 
     {
+        vec3 reflectedDir = reflect(-viewDir, normal);
+
+        Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), reflectedDir);
+        Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+        if (intersection.hit) {
+            Material material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
+            float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
+            radiance += (
+                0.05 * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion + 
+                material.emission + 
+                brdf(material, material.normal, -ray.direction, sunDir, NdotL) * lightIntensity * NdotL
+            ) * fresnel;
+        } else {
+            vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir) * LIGHT_INTENSITY;
+            radiance += sky * fresnel;
+        }
+    }
+
+
+    {
         float NdotL = dot(waterMaterial.normal, sunDir);
         if (NdotL > 0.001) {
             vec3 specular = brdf(waterMaterial, normal, viewDir, sunDir, clamp(dot(sunDir, normal), 0.0, 1.0)) * NdotL * lightIntensity;
-            radiance = mix(radiance, specular, fresnelSchlick(vec3(0.02), clamp(dot(normal, viewDir), 0.001, 0.999)).x);
+            radiance += specular * fresnel;
         }
     }
 

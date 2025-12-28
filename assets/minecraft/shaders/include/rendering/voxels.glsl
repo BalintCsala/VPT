@@ -21,7 +21,7 @@ int getVoxelRange() {
 ivec2 getVoxelPixelPos(ivec3 position) {
     int range = getVoxelRange();
     int halfRange = range / 2;
-    if (clamp(position, -halfRange + 1, halfRange) != position) {
+    if (clamp(position, -halfRange + 1, halfRange - 2) != position) {
         return ivec2(-1);
     }
     ivec3 unsignedPosition = position + halfRange;
