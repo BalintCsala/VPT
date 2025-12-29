@@ -9,3 +9,4 @@
 - Farther voxel view distance
 - Water reflections
 - Screenspace fallback for tracing
+- Add proper auto UV calculations when it isn't provided by the model file
