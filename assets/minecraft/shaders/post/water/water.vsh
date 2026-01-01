@@ -21,5 +21,5 @@ void extra();
 
 void extra() {
     vec3 sunDir = normalize(sunDirection);
-    lightIntensity = atmosphere(vec3(0.0, PLANET_RADIUS + 1.8, 0.0), sunDir, sunDir);
+    lightIntensity = atmosphere(vec3(0.0, PLANET_RADIUS + 1.8, 0.0), sunDir, sunDir, 0.5);
 }

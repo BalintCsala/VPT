@@ -3,7 +3,6 @@
 #moj_import <minecraft:utilities/colors.glsl>
 #moj_import <minecraft:globals.glsl>
 #moj_import <minecraft:utilities/colors.glsl>
-#moj_import <minecraft:utilities/random.glsl>
 
 uniform sampler2D DepthSampler;
 uniform sampler2D SkySampler;
@@ -39,6 +38,5 @@ void main() {
             mixingParam.y
         );
 
-    uint randState = initRNG(uvec2(gl_FragCoord.xy), uvec2(ScreenSize), uint(GameTime * 20.0 * 60.0 * 300.0));
-    fragColor = encodeHDR(sky + randFloat(randState) * 0.01);
+    fragColor = encodeHDR(sky);
 }

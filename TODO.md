@@ -10,3 +10,5 @@
 - Water reflections
 - Screenspace fallback for tracing
 - Add proper auto UV calculations when it isn't provided by the model file
+- Rename hdr_output to color_correction
+- Underwater detection

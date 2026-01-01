@@ -10,8 +10,9 @@
 #moj_import <minecraft:rendering/raytrace.glsl>
 #moj_import <minecraft:rendering/pbr/material.glsl>
 #moj_import <minecraft:rendering/atmosphere.glsl>
+#moj_import <minecraft:hacks.glsl>
 
-const vec3 WATER_EXTINCTION_COEFF = vec3(1.2340e-8, 2.1344e-9, 9.724e-10) * 4.0 * PI / RGB_WAVELENGTHS;
+const vec3 WATER_EXTINCTION_COEFF = 1.0 - vec3(0.38, 0.58, 0.48);
 const float WATER_IOR = 1.333;
 const float REFRACTION_FUDGE_FACTOR = 0.7;
 const int SSRT_STEPS = 8;
@@ -39,27 +40,45 @@ in vec3 lightIntensity;
 
 out vec4 fragColor;
 
-const vec4[] WAVE_PARAMS = vec4[](
-        vec4(-0.40265, 0.91535, 400.00000, 0.00020),
-        vec4(-0.96752, 0.25278, 240.00000, 0.00040),
-        vec4(-0.44129, 0.89737, 144.00000, 0.00080),
-        vec4(0.79777, 0.60296, 86.40000, 0.00160),
-        vec4(0.77260, 0.63490, 51.84000, 0.00320),
-        vec4(0.10668, 0.99429, 31.10400, 0.00640),
-        vec4(-0.96931, 0.24583, 18.66240, 0.01280),
-        vec4(-0.52662, 0.85010, 11.19744, 0.02560),
-        vec4(0.43712, 0.89940, 6.71846, 0.05120),
-        vec4(-0.84470, 0.53524, 4.03108, 0.10240),
-        vec4(0.93952, 0.34250, 2.41865, 0.20480),
-        vec4(0.34952, 0.93693, 1.45119, 0.40960),
-        vec4(0.39672, 0.91794, 0.87071, 0.81920),
-        vec4(0.66205, 0.74946, 0.52243, 1.63840),
-        vec4(0.41432, 0.91013, 0.31346, 3.27680));
+struct Wave {
+    vec2 direction;
+    float waveNumber;
+    float frequency;
+    float amplitude;
+};
 
+const Wave[] WAVE_PARAMS = Wave[](
+        Wave(vec2(0.792330, -0.610093), 335.255081, 57.344538, 0.000073),
+        Wave(vec2(0.727436, 0.686176), 286.067669, 52.972488, 0.000086),
+        Wave(vec2(0.763461, 0.645854), 94.134635, 30.384437, 0.000261),
+        Wave(vec2(0.796133, -0.605121), 56.492615, 23.541001, 0.000434),
+        Wave(vec2(0.508631, -0.860985), 45.083855, 21.027727, 0.000544),
+        Wave(vec2(0.803054, -0.595906), 34.078153, 18.278833, 0.000720),
+        Wave(vec2(0.942411, 0.334458), 16.419563, 12.686798, 0.001495),
+        Wave(vec2(0.978580, 0.205865), 13.543189, 11.524409, 0.001812),
+        Wave(vec2(0.953498, 0.301399), 13.521125, 11.513937, 0.001815),
+        Wave(vec2(0.962634, -0.270807), 13.201664, 11.377801, 0.001859),
+        Wave(vec2(0.903494, 0.428601), 8.589489, 9.178687, 0.002857),
+        Wave(vec2(0.998913, 0.046621), 7.609370, 8.639380, 0.003225),
+        Wave(vec2(0.779681, -0.626177), 2.246977, 4.691445, 0.010923),
+        Wave(vec2(0.611150, 0.791515), 1.307998, 3.581416, 0.018764),
+        Wave(vec2(0.840992, -0.541047), 1.074261, 3.241076, 0.022847),
+        Wave(vec2(0.725323, 0.688408), 0.971099, 3.083997, 0.025274),
+        Wave(vec2(0.721998, -0.691895), 0.957780, 3.063053, 0.025626),
+        Wave(vec2(0.917864, 0.396894), 0.725192, 2.665118, 0.033844),
+        Wave(vec2(0.945143, 0.326656), 0.677090, 2.576106, 0.036249),
+        Wave(vec2(0.956561, -0.291532), 0.538919, 2.298599, 0.045542),
+        Wave(vec2(0.530888, -0.847442), 0.380782, 1.932079, 0.064456),
+        Wave(vec2(0.840253, 0.542194), 0.362883, 1.884956, 0.067635),
+        Wave(vec2(0.633772, -0.773520), 0.295529, 1.701696, 0.083050),
+        Wave(vec2(0.974190, -0.225728), 0.193314, 1.377065, 0.126963),
+        Wave(vec2(0.985255, 0.171093), 0.150017, 1.209513, 0.163606),
+        Wave(vec2(0.591065, -0.806624), 0.037396, 0.602139, 0.656314),
+        Wave(vec2(0.904077, -0.427370), 0.024485, 0.486947, 1.002397)
+    );
 const int WAVE_COMPONENTS = 6;
 
 void main() {
-    gl_FragDepth = 0.1;
     uint randState = initRNG(uvec2(gl_FragCoord.xy), uvec2(ScreenSize), uint(GameTime * 20.0 * 60.0 * 300.0));
 
     vec2 scaledTexCoord = texCoord * vec2(0.5, 1.0);
@@ -86,44 +105,39 @@ void main() {
     vec3 solidPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, solidDepth));
     vec3 worldPos = fragmentPos + cameraPosition;
 
+    float effectScaleFactor = log2(length(fragmentPos) + 1.0);
+
     bool topFace = false;
     vec4 material1 = textureLod(TranslucentMaterial1Sampler, texCoord, 0.0);
     vec3 normal = getNormal(material1);
     if (normal.y > 0.95) {
         topFace = true;
 
-        float weight = 0.0;
-        float time = GameTime * 200.0 * 2.0 * PI;
+        float time = GameTime * 1200.0;
         vec2 deriv = vec2(0.0);
-        float startOffset = min(log2(length(fragmentPos.xz) + 1.0) * 2.0, float(WAVE_PARAMS.length() - WAVE_COMPONENTS));
+        float startOffset = clamp(effectScaleFactor * 3.5 - 2.0, 0.0, float(WAVE_PARAMS.length() - WAVE_COMPONENTS));
 
         uint waveRand = 123457;
         for (int i = 0; i < WAVE_COMPONENTS; i++) {
-            vec4 params = WAVE_PARAMS[i + int(startOffset)];
-            vec2 dir = params.xy;
-            float frequency = params.z;
-            float scale = params.w;
-            float dist = dot(worldPos.xz, dir);
-
-            float timeVal = mod(dist * frequency + time, 2.0 * PI);
-            vec2 componentDeriv = exp(sin(timeVal)) * cos(timeVal) * scale * frequency * dir;
+            Wave params = WAVE_PARAMS[i + int(startOffset)];
 
             if (i == 0) {
-                scale *= 1.0 - fract(startOffset);
-                componentDeriv *= 1.0 - fract(startOffset);
+                params.amplitude *= 1.0 - fract(startOffset);
             } else if (i == WAVE_COMPONENTS - 1) {
-                scale *= fract(startOffset);
-                componentDeriv *= fract(startOffset);
+                params.amplitude *= fract(startOffset);
             }
 
+            float inner = dot(worldPos.xz, params.direction) * params.waveNumber - time * params.frequency;
+            float sinTerm = sin(inner) + 1.0;
+            float cosTerm = cos(inner);
+            vec2 componentDeriv = 0.5 * params.amplitude * params.waveNumber * sinTerm * cosTerm * params.direction;
+
             deriv += componentDeriv;
-            weight += scale;
         }
-        deriv *= 0.4 / 16.0;
 
         normal = cross(vec3(0, deriv.y, 1), vec3(1, deriv.x, 0));
         vec3 viewDir = normalize(fragmentPos);
-        normal -= max(dot(normal, viewDir), 0.0) * viewDir;
+        normal -= max(dot(normal, viewDir), 0.05) * viewDir;
         normal = normalize(normal);
     }
 
@@ -157,7 +171,6 @@ void main() {
             // Limit absorption for vertical faces as these are normally "waterfalls"
             dist = min(dist, 1.4);
         }
-        vec3 throughput = exp(-dist * WATER_EXTINCTION_COEFF);
 
         vec3 endPos = fragmentPos + refractedDir * dist;
         vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
@@ -217,12 +230,14 @@ void main() {
             }
         }
 
+        vec3 throughput = exp(-dist * WATER_EXTINCTION_COEFF);
+
         if (solidDepth == 1.0) {
             // Sky behind water
             radiance += throughput * decodeHDR(textureLod(SolidSampler, texCoord, 0.0)) * (1.0 - fresnel);
             dist = min(dist, 1.4);
         } else {
-            radiance += throughput * (material.emission + 0.05 * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion) * (1.0 - fresnel);
+            radiance += throughput * (material.emission + AMBIENT_FACTOR * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion) * (1.0 - fresnel);
             float NdotL = dot(material.normal, sunDir);
             if (NdotL > 0.001) {
                 Ray sunRay = Ray(intersection.voxelPos, endPos - fract(CameraOffset), sunDir);
@@ -237,7 +252,7 @@ void main() {
     Material waterMaterial = Material(
             vec3(0.0),
             vec3(0.02),
-            0.0015,
+            effectScaleFactor * 0.001 + 0.002,
             0.0,
             0.0,
             vec3(0.0),
@@ -253,16 +268,15 @@ void main() {
             Material material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
             float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
             radiance += (
-                0.05 * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion + 
-                material.emission + 
-                brdf(material, material.normal, -ray.direction, sunDir, NdotL) * lightIntensity * NdotL
-            ) * fresnel;
+                AMBIENT_FACTOR * material.albedo * (1.0 - material.metallic) * material.ambientOcclusion +
+                    material.emission +
+                    brdf(material, material.normal, -ray.direction, sunDir, NdotL) * lightIntensity * NdotL
+                ) * fresnel;
         } else {
-            vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir) * LIGHT_INTENSITY;
+            vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir, randFloat(randState)) * LIGHT_INTENSITY;
             radiance += sky * fresnel;
         }
     }
-
 
     {
         float NdotL = dot(waterMaterial.normal, sunDir);

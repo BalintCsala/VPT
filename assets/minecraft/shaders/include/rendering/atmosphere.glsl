@@ -3,7 +3,7 @@
 
 #moj_import <minecraft:math/constants.glsl>
 
-const vec3 LIGHT_INTENSITY = vec3(1.0, 0.9, 0.8) * 3.5; //vec3(1, 0.75, 0.28) * 2.5;
+const vec3 LIGHT_INTENSITY = vec3(1.0, 0.9, 0.8) * 3.5;
 
 const vec3 RAYLEIGH_SCATTERING_COEFF = vec3(5.5e-6, 13.0e-6, 22.4e-6);
 const float MIE_SCATTERING_COEFF = 2.1e-5;
@@ -11,7 +11,7 @@ const vec3 OZONE_ABSORPTION = vec3(2.04e-5, 4.97e-5, 1.95e-6);
 
 const float PLANET_RADIUS = 6371.0e3;
 const float ATMOSPHERE_RADIUS = PLANET_RADIUS + 100.0e3;
-const int MAIN_STEPS = 20;
+const int MAIN_STEPS = 16;
 const int SECONDARY_STEPS = 5;
 const float COS_SUN_ANGULAR_RADIUS = cos(radians(0.53));
 const float SUN_EDGE_SIZE = 0.00003;
@@ -69,7 +69,7 @@ vec3 calculateOpticalDepthToSun(vec3 origin, vec3 direction) {
     return opticalDepth * stepSize;
 }
 
-vec3 atmosphere(vec3 origin, vec3 direction, vec3 sunDir) {
+vec3 atmosphere(vec3 origin, vec3 direction, vec3 sunDir, float jitter) {
     vec3 pos = origin;
     float distToAtmosphere = sphereIntersect(origin, direction, ATMOSPHERE_RADIUS).y;
     float distToPlanet = sphereIntersect(origin, direction, PLANET_RADIUS).x;
@@ -77,7 +77,7 @@ vec3 atmosphere(vec3 origin, vec3 direction, vec3 sunDir) {
 
     float stepSize = dist / float(MAIN_STEPS - 1);
     vec3 rayStep = direction * stepSize;
-    pos += rayStep * 0.5;
+    pos += rayStep * (jitter * 0.03 + 0.485);
 
     float cosTheta = dot(direction, sunDir);
     float rayleighPhase = calculateRayleighPhase(cosTheta);

@@ -32,7 +32,7 @@ void main() {
     sunDirection = screenData.sunDirection;
     sunInfo = screenData.sunInfo;
     vec3 sunDir = normalize(sunDirection);
-    lightIntensity = atmosphere(vec3(0.0, PLANET_RADIUS + 1.8, 0.0), sunDir, sunDir);
+    lightIntensity = atmosphere(vec3(0.0, PLANET_RADIUS + 1.8, 0.0), sunDir, sunDir, 0.5);
 
     vec2 uv = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
     vec4 pos = vec4(uv * vec2(2, 2) + vec2(-1, -1), 0, 1);

@@ -7,6 +7,7 @@
 #moj_import <minecraft:rendering/pbr/brdf.glsl>
 #moj_import <minecraft:rendering/pbr/material.glsl>
 #moj_import <minecraft:rendering/atmosphere.glsl>
+#moj_import <minecraft:hacks.glsl>
 
 uniform sampler2D DataSampler;
 uniform sampler2D DepthSampler;
@@ -64,7 +65,7 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
     float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
 
-    vec3 radiance = 0.05 * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
+    vec3 radiance = AMBIENT_FACTOR * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
     if (NdotL > 0.001) {
         vec3 intensity = lightIntensity;
         if (sunInfo >= 2.0) {
