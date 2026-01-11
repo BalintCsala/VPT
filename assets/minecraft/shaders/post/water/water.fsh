@@ -264,6 +264,7 @@ void main() {
 
         Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), reflectedDir);
         Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
+
         if (intersection.hit) {
             Material material = readMaterialFromAtlas(AtlasSampler, srgbToLinear(intersection.albedo.rgb), intersection.uv, intersection.tbn);
             float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
@@ -273,8 +274,15 @@ void main() {
                     brdf(material, material.normal, -ray.direction, sunDir, NdotL) * lightIntensity * NdotL
                 ) * fresnel;
         } else {
-            vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir, randFloat(randState)) * LIGHT_INTENSITY;
-            radiance += sky * fresnel;
+            vec3 startPos = fragmentPos + reflectedDir * intersection.t;
+            vec3 endPos = startPos + reflectedDir * 64.0;
+            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, viewMat, projMat, projMatInv, 0.1, 8, 4, randFloat(randState), false);
+            if (result.hit) {
+                radiance += decodeHDR(textureLod(SolidSampler, result.screenPos.xy, 0.0)) * fresnel;
+            } else {
+                vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir, 0.5) * LIGHT_INTENSITY;
+                radiance += sky * fresnel;
+            }
         }
     }
 

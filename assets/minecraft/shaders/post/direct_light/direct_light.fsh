@@ -75,8 +75,13 @@ void main() {
         Ray sunRay = Ray(voxelPos, hitPos, sunDir);
         Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
         if (!sunIntersection.hit) {
-            vec3 view = -normalize(playerPos);
-            radiance += brdf(material, material.normal, view, sunDir, NdotL) * intensity * NdotL;
+            vec3 startPos = playerPos + sunIntersection.t * sunDir;
+            vec3 endPos = startPos + sunDir * 32.0;
+            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, viewMat, projMat, projMatInv, 0.1, 12, 0, 0.3, false);
+            if (!result.hit) {
+                vec3 view = -normalize(playerPos);
+                radiance += brdf(material, material.normal, view, sunDir, NdotL) * intensity * NdotL;
+            }
         }
     }
 
