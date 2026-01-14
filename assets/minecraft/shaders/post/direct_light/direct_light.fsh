@@ -65,13 +65,8 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
     float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
 
-    vec3 radiance = AMBIENT_FACTOR * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
+    vec3 radiance = lightIntensity * AMBIENT_FACTOR * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
     if (NdotL > 0.001) {
-        vec3 intensity = lightIntensity;
-        if (sunInfo >= 2.0) {
-            intensity = vec3(0.7, 0.16, 0.82) * 1.8 * (sunInfo - 2.0);
-        }
-
         Ray sunRay = Ray(voxelPos, hitPos, sunDir);
         Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);
         if (!sunIntersection.hit) {
@@ -80,7 +75,7 @@ void main() {
             SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, viewMat, projMat, projMatInv, 0.1, 12, 0, 0.3, false);
             if (!result.hit) {
                 vec3 view = -normalize(playerPos);
-                radiance += brdf(material, material.normal, view, sunDir, NdotL) * intensity * NdotL;
+                radiance += brdf(material, material.normal, view, sunDir, NdotL) * lightIntensity * NdotL;
             }
         }
     }

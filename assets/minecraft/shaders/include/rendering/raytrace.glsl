@@ -30,7 +30,7 @@ SSRTResult raytraceSS(sampler2D depthTex, vec3 screenStart, vec3 screenEnd, mat4
         if (depth < pos.z) {
             vec3 viewPos = screenToView(projInv, pos);
             vec3 sampleViewPos = screenToView(projInv, vec3(pos.xy, depth));
-            bool overshot = viewPos.z > sampleViewPos.z + surfaceThickness;
+            bool overshot = length(viewPos) > length(sampleViewPos) + surfaceThickness;
             if (overshot && exitOnOvershoot) {
                 return SSRTResult(false, pos);
             } else if (!overshot) {
@@ -56,7 +56,7 @@ SSRTResult raytraceSS(sampler2D depthTex, vec3 screenStart, vec3 screenEnd, mat4
         if (depth < pos.z) {
             vec3 viewPos = screenToView(projInv, pos);
             vec3 sampleViewPos = screenToView(projInv, vec3(pos.xy, depth));
-            hit = viewPos.z < sampleViewPos.z + surfaceThickness;
+            hit = length(viewPos) < length(sampleViewPos) + surfaceThickness;
         }
         if (hit) {
             pos += stepSize;

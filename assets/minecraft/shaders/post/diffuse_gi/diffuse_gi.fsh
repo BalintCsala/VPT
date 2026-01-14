@@ -28,9 +28,6 @@ in vec2 texCoord;
 
 out vec4 fragColor;
 
-const vec3 LIGHT_INTENSITY = vec3(1, 0.75, 0.28) * 2.5;
-const vec3 SKYLIGHT_INTENSITY = vec3(0.81, 0.89, 1) * 0.3;
-
 void main() {
     // Make sure GI only runs at 0.25x resolution
     vec2 txCoord = texCoord * 4.0;

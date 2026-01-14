@@ -3,7 +3,7 @@
 
 #moj_import <minecraft:math/constants.glsl>
 
-const vec3 LIGHT_INTENSITY = vec3(1.0, 0.9, 0.8) * 3.5;
+const vec3 LIGHT_INTENSITY = vec3(1.0) * 3.5;
 
 const vec3 RAYLEIGH_SCATTERING_COEFF = vec3(5.5e-6, 13.0e-6, 22.4e-6);
 const float MIE_SCATTERING_COEFF = 2.1e-5;
