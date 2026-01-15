@@ -104,40 +104,34 @@ pipeline.addPass(
   ),
 );
 
-/*const diffuseGI = pipeline.addTarget(new Target("diffuse_gi"));
+const rawDiffuseGI = pipeline.addTarget(new Target("raw_diffuse_gi"));
 pipeline.addPass(
   new Pass(
-    "minecraft:post/diffuse_gi/diffuse_gi",
-    "minecraft:post/diffuse_gi/diffuse_gi",
+    "minecraft:post/gi/diffuse_gi",
+    "minecraft:post/gi/diffuse_gi",
     {},
     [
       new TargetInput("Data", implicitMainTarget),
       new TargetInput("Depth", implicitMainTarget, true),
-      new TargetInput("TranslucentDepth", implicitTranslucentTarget, true),
-      new TargetInput("TranslucentNormal", translucentNormal),
+      new TargetInput("Material1", material1),
+      new TargetInput("Material2", material2),
       new FileInput("Atlas", "minecraft:atlas"),
       new FileInput("ModelData", "minecraft:model_data"),
-      new TargetInput("Material1", material1),
-      new TargetInput("Material2", Material2),
     ],
-    diffuseGI
-  )
-);*/
+    rawDiffuseGI,
+  ),
+);
 
-/*const hdr = pipeline.addTarget(new Target("hdr"));
+const diffuseGI = pipeline.addTarget(new Target("diffuse_gi"));
 pipeline.addPass(
   new Pass(
-    "minecraft:post/screenquad",
-    "minecraft:post/combine_gi/combine_gi",
+    "minecraft:post/gi/downsample_diffuse",
+    "minecraft:post/gi/downsample_diffuse",
     {},
-    [
-      new TargetInput("DirectLight", directLight),
-      //new TargetInput("DiffuseGI", diffuseGI),
-      //new TargetInput("Albedo", implicitMainTarget),
-    ],
-    hdr
-  )
-);*/
+    [new TargetInput("DiffuseGI", rawDiffuseGI)],
+    diffuseGI,
+  ),
+);
 
 const sky = pipeline.addTarget(new Target("sky"));
 pipeline.addPass(
@@ -200,6 +194,7 @@ pipeline.addPass(
     {},
     [
       new TargetInput("Direct", radiance),
+      new TargetInput("DiffuseGI", diffuseGI),
       new TargetInput("Bloom", bloomResult),
     ],
     final,

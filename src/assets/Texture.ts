@@ -80,7 +80,7 @@ export async function generateAtlas(zip: JSZip) {
   const textureLocations = new Map<string, TextureLocation>();
   let requiredPixels = textures.reduce(
     (sum, texture) => sum + texture.size * texture.size,
-    0
+    0,
   );
 
   const atlasSize = 2 ** Math.ceil(Math.log2(requiredPixels) / 2);
@@ -118,7 +118,7 @@ export async function generateAtlas(zip: JSZip) {
           case 3:
           case 4:
             pixelData.set(
-              texture.data.subarray(pixelIndex, pixelIndex + texture.channels)
+              texture.data.subarray(pixelIndex, pixelIndex + texture.channels),
             );
             break;
         }
@@ -176,7 +176,7 @@ export async function generateAtlas(zip: JSZip) {
       data: atlasData,
       depth: 8,
       channels: 4,
-    })
+    }),
   );
 
   return {

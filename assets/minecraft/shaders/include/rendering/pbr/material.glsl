@@ -17,7 +17,7 @@ const vec3[] HARDCODED_METALS = vec3[](
         vec3(0.94361, 0.90240, 0.83660) // Silver
     );
 
-const float MAX_EMISSION = 100.0;
+const float MAX_EMISSION = 6.0;
 
 struct Material {
     vec3 albedo;

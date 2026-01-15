@@ -45,6 +45,24 @@
         0
       ]
     },
+    "raw_diffuse_gi": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "diffuse_gi": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
     "sky": {
       "persistent": true,
       "clear_color": [
@@ -507,6 +525,66 @@
         }
       ],
       "output": "radiance",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/gi/diffuse_gi",
+      "fragment_shader": "minecraft:post/gi/diffuse_gi",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "Material1",
+          "bilinear": false,
+          "target": "material1",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Material2",
+          "bilinear": false,
+          "target": "material2",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Atlas",
+          "bilinear": false,
+          "location": "minecraft:atlas",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "sampler_name": "ModelData",
+          "bilinear": false,
+          "location": "minecraft:model_data",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "output": "raw_diffuse_gi",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/gi/downsample_diffuse",
+      "fragment_shader": "minecraft:post/gi/downsample_diffuse",
+      "inputs": [
+        {
+          "sampler_name": "DiffuseGI",
+          "bilinear": false,
+          "target": "raw_diffuse_gi",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "diffuse_gi",
       "uniforms": {}
     },
     {
@@ -1007,6 +1085,12 @@
           "sampler_name": "Direct",
           "bilinear": false,
           "target": "radiance_swap",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "DiffuseGI",
+          "bilinear": false,
+          "target": "diffuse_gi",
           "use_depth_buffer": false
         },
         {

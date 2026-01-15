@@ -280,7 +280,7 @@ void main() {
             if (result.hit) {
                 radiance += decodeHDR(textureLod(SolidSampler, result.screenPos.xy, 0.0)) * fresnel;
             } else {
-                vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir, 0.5) * LIGHT_INTENSITY;
+                vec3 sky = atmosphere(ray.origin + vec3(0.0, PLANET_RADIUS, 0.0), ray.direction, sunDir, 0.5);
                 radiance += sky * fresnel;
             }
         }

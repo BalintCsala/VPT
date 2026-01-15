@@ -65,7 +65,7 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
     float NdotL = clamp(dot(material.normal, sunDir), 0.0, 1.0);
 
-    vec3 radiance = lightIntensity * AMBIENT_FACTOR * albedo * (1.0 - material.metallic) * material.ambientOcclusion + material.emission;
+    vec3 radiance = material.emission;
     if (NdotL > 0.001) {
         Ray sunRay = Ray(voxelPos, hitPos, sunDir);
         Intersection sunIntersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, sunRay);

@@ -32,7 +32,7 @@ void main() {
     vec3 sunDir = normalize(sunDirection);
 
     vec3 rayOrigin = vec3(0.0, PLANET_RADIUS + 1.8, 0.0);
-    vec3 sky = atmosphere(rayOrigin, rayDir, sunDir, randFloat(randState)) * LIGHT_INTENSITY;
+    vec3 sky = atmosphere(rayOrigin, rayDir, sunDir, randFloat(randState));
     vec3 ground = smoothstep(0.0, 0.1, sunDir.y) * (1.0 - smoothstep(0.0, 0.1, rayDir.y)) * GROUND_COLOR;
     fragColor = encodeHDR(sky + ground);
 }
