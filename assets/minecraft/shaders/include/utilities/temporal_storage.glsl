@@ -5,17 +5,11 @@
 
 #moj_import <minecraft:utilities/float_storage.glsl>
 
-const int CAMERA_POSITION_X_INDEX = 0;
-const int CAMERA_POSITION_Y_INDEX = 1;
-const int CAMERA_POSITION_Z_INDEX = 2;
-const int TIME_INDEX = 3;
-const int EXPOSURE_INDEX = 4;
-
 vec3 getPreviousCameraPosition(sampler2D temporalSampler) {
     return vec3(
-        decodeFloat(texelFetch(temporalSampler, ivec2(CAMERA_POSITION_X_INDEX, 0), 0)),
-        decodeFloat(texelFetch(temporalSampler, ivec2(CAMERA_POSITION_Y_INDEX, 0), 0)),
-        decodeFloat(texelFetch(temporalSampler, ivec2(CAMERA_POSITION_Z_INDEX, 0), 0))
+        decodeFloat(texelFetch(temporalSampler, ivec2(0, 0), 0)),
+        decodeFloat(texelFetch(temporalSampler, ivec2(1, 0), 0)),
+        decodeFloat(texelFetch(temporalSampler, ivec2(2, 0), 0))
     );
 }
 
@@ -24,7 +18,7 @@ vec3 getCameraOffset(sampler2D temporalSampler, vec3 cameraPosition) {
 }
 
 float getPreviousTime(sampler2D temporalSampler) {
-    return decodeFloat(texelFetch(temporalSampler, ivec2(TIME_INDEX, 0), 0));
+    return decodeFloat(texelFetch(temporalSampler, ivec2(3, 0), 0));
 }
 
 float getDeltaTime(sampler2D temporalSampler, float time) {
@@ -32,7 +26,23 @@ float getDeltaTime(sampler2D temporalSampler, float time) {
 }
 
 float getPreviousExposure(sampler2D temporalSampler) {
-    return decodeFloat(texelFetch(temporalSampler, ivec2(EXPOSURE_INDEX, 0), 0));
+    return decodeFloat(texelFetch(temporalSampler, ivec2(4, 0), 0));
+}
+
+mat4 getPreviousProj(sampler2D temporalSampler) {
+    mat4 proj;
+    for (int i = 0; i < 16; i++) {
+        proj[i % 4][i / 4] = decodeFloat(texelFetch(temporalSampler, ivec2(5 + i, 0), 0));
+    }
+    return proj;
+}
+
+mat4 getPreviousView(sampler2D temporalSampler) {
+    mat4 view;
+    for (int i = 0; i < 16; i++) {
+        view[i % 4][i / 4] = decodeFloat(texelFetch(temporalSampler, ivec2(21 + i, 0), 0));
+    }
+    return view;
 }
 
 #endif // TEMPORAL_STORAGE_GLSL

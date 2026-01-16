@@ -26,6 +26,8 @@ generateSettingsFile([
 
 const pipeline = new Pipeline();
 
+const temporalData = pipeline.addTarget(new Target("temporal_data", 64, 1));
+
 const material1 = pipeline.addTarget(new Target("material1"));
 pipeline.addPass(
   new Pass(
@@ -133,6 +135,48 @@ pipeline.addPass(
   ),
 );
 
+const prevDepth = pipeline.addTarget(new Target("prev_depth"));
+const prevDiffuseGI = pipeline.addTarget(new Target("prev_diffuse_gi"));
+const accumulatedDiffuseGI = pipeline.addTarget(
+  new Target("accumulated_diffuse_gi"),
+);
+pipeline.addPass(
+  new Pass(
+    "minecraft:post/temporal_accumulation/temporal_accumulation",
+    "minecraft:post/temporal_accumulation/temporal_accumulation",
+    {},
+    [
+      new TargetInput("Data", implicitMainTarget),
+      new TargetInput("Temporal", temporalData),
+      new TargetInput("Depth", implicitMainTarget, true),
+      new TargetInput("PreviousDepth", prevDepth),
+      new TargetInput("Current", diffuseGI),
+      new TargetInput("Previous", prevDiffuseGI),
+    ],
+    accumulatedDiffuseGI,
+  ),
+);
+
+pipeline.addPass(
+  new Pass(
+    "minecraft:post/copy/copy_scaled",
+    "minecraft:post/copy/copy_scaled",
+    {},
+    [new TargetInput("Main", accumulatedDiffuseGI)],
+    prevDiffuseGI,
+  ),
+);
+
+pipeline.addPass(
+  new Pass(
+    "minecraft:post/copy/copy_depth",
+    "minecraft:post/copy/copy_depth",
+    {},
+    [new TargetInput("Depth", implicitMainTarget, true)],
+    prevDepth,
+  ),
+);
+
 const sky = pipeline.addTarget(new Target("sky"));
 pipeline.addPass(
   new Pass(
@@ -193,8 +237,9 @@ pipeline.addPass(
     "minecraft:post/hdr_output/hdr_output",
     {},
     [
+      new TargetInput("Main", implicitMainTarget),
       new TargetInput("Direct", radiance),
-      new TargetInput("DiffuseGI", diffuseGI),
+      new TargetInput("DiffuseGI", accumulatedDiffuseGI),
       new TargetInput("Bloom", bloomResult),
     ],
     final,
@@ -220,6 +265,16 @@ pipeline.addPass(
       new TargetInput("WeatherDepth", implicitWeatherTarget, true),
     ],
     result,
+  ),
+);
+
+pipeline.addPass(
+  new Pass(
+    "minecraft:post/temporal_data/temporal_data",
+    "minecraft:post/temporal_data/temporal_data",
+    {},
+    [new TargetInput("Data", implicitMainTarget)],
+    temporalData,
   ),
 );
 

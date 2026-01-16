@@ -31,7 +31,7 @@ out vec4 fragColor;
 
 void main() {
     // Round pixels down to 4x4 chunks
-    ivec2 parentPixel = ivec2(gl_FragCoord.xy) / ivec2(4, 2) * 4;
+    ivec2 parentPixel = ivec2(gl_FragCoord.xy) / ivec2(2, 2) * 4;
 
     float depth = texelFetch(DepthSampler, parentPixel / ivec2(2, 1), 0).r;
     if (depth == 1.0) {
@@ -70,9 +70,9 @@ void main() {
     for (int i = 0; i < 3; i++) {
         BRDFSample samp = sampleDiffuse(material, material.normal, state);
         ray.direction = samp.direction;
-        //if (i != 0) {
-        throughput *= samp.throughput;
-        // }
+        if (i != 0) {
+            throughput *= samp.throughput;
+        }
         Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
 
         if (!intersection.hit) {

@@ -15,10 +15,9 @@ void extra();
 #define PROJ_MAT_INV
 #define VIEW_MAT
 #define VIEW_MAT_INV
-#define MODEL_OFFSET
 #define SUN_DIRECTION
 
-#define SCALE vec2(1.0, 0.5)
+#define SCALE 0.5
 
 #moj_import <minecraft:templates/fullscreen_with_data.vsh>
 

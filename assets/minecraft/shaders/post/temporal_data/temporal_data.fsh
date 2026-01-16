@@ -4,9 +4,9 @@
 #moj_import <minecraft:utilities/float_storage.glsl>
 #moj_import <minecraft:globals.glsl>
 
-uniform sampler2D Previous;
-
 in float exposure;
+in mat4 projMat;
+in mat4 viewMat;
 
 out vec4 fragColor;
 
@@ -15,26 +15,22 @@ const int CAMERA_POSITION_Y_INDEX = 1;
 const int CAMERA_POSITION_Z_INDEX = 2;
 const int TIME_INDEX = 3;
 const int EXPOSURE_INDEX = 4;
+const int PROJ_INDEX = 5;
+const int VIEW_INDEX = 6;
 
 void main() {
     int index = int(gl_FragCoord.x);
-    switch (index) {
-        case CAMERA_POSITION_X_INDEX:
-        fragColor = encodeFloat(float(CameraBlockPos.x) - CameraOffset.x);
-        break;
-        case CAMERA_POSITION_Y_INDEX:
-        fragColor = encodeFloat(float(CameraBlockPos.y) - CameraOffset.y);
-        break;
-        case CAMERA_POSITION_Z_INDEX:
-        fragColor = encodeFloat(float(CameraBlockPos.z) - CameraOffset.z);
-        break;
-        case TIME_INDEX:
+    if (index <= 2) {
+        fragColor = encodeFloat(float(CameraBlockPos[index]) - fract(CameraOffset[index]));
+    } else if (index == 3) {
         fragColor = encodeFloat(GameTime);
-        break;
-        case EXPOSURE_INDEX:
+    } else if (index == 4) {
         fragColor = encodeFloat(exposure);
-        break;
-        default:
-        discard;
+    } else if (index <= 20) {
+        int i = index - 5;
+        fragColor = encodeFloat(projMat[i % 4][i / 4]);
+    } else if (index <= 36) {
+        int i = index - 21;
+        fragColor = encodeFloat(viewMat[i % 4][i / 4]);
     }
 }

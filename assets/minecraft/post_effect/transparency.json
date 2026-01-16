@@ -1,5 +1,16 @@
 {
   "targets": {
+    "temporal_data": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "width": 64,
+      "height": 1
+    },
     "material1": {
       "persistent": true,
       "clear_color": [
@@ -55,6 +66,33 @@
       ]
     },
     "diffuse_gi": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "prev_depth": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "prev_diffuse_gi": {
+      "persistent": true,
+      "clear_color": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "accumulated_diffuse_gi": {
       "persistent": true,
       "clear_color": [
         0,
@@ -588,6 +626,78 @@
       "uniforms": {}
     },
     {
+      "vertex_shader": "minecraft:post/temporal_accumulation/temporal_accumulation",
+      "fragment_shader": "minecraft:post/temporal_accumulation/temporal_accumulation",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Temporal",
+          "bilinear": false,
+          "target": "temporal_data",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        },
+        {
+          "sampler_name": "PreviousDepth",
+          "bilinear": false,
+          "target": "prev_depth",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Current",
+          "bilinear": false,
+          "target": "diffuse_gi",
+          "use_depth_buffer": false
+        },
+        {
+          "sampler_name": "Previous",
+          "bilinear": false,
+          "target": "prev_diffuse_gi",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "accumulated_diffuse_gi",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/copy/copy_scaled",
+      "fragment_shader": "minecraft:post/copy/copy_scaled",
+      "inputs": [
+        {
+          "sampler_name": "Main",
+          "bilinear": false,
+          "target": "accumulated_diffuse_gi",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "prev_diffuse_gi",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/copy/copy_depth",
+      "fragment_shader": "minecraft:post/copy/copy_depth",
+      "inputs": [
+        {
+          "sampler_name": "Depth",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": true
+        }
+      ],
+      "output": "prev_depth",
+      "uniforms": {}
+    },
+    {
       "vertex_shader": "minecraft:post/sky/render_sky",
       "fragment_shader": "minecraft:post/sky/render_sky",
       "inputs": [
@@ -1082,6 +1192,12 @@
       "fragment_shader": "minecraft:post/hdr_output/hdr_output",
       "inputs": [
         {
+          "sampler_name": "Main",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        },
+        {
           "sampler_name": "Direct",
           "bilinear": false,
           "target": "radiance_swap",
@@ -1090,7 +1206,7 @@
         {
           "sampler_name": "DiffuseGI",
           "bilinear": false,
-          "target": "diffuse_gi",
+          "target": "accumulated_diffuse_gi",
           "use_depth_buffer": false
         },
         {
@@ -1169,6 +1285,20 @@
         }
       ],
       "output": "result",
+      "uniforms": {}
+    },
+    {
+      "vertex_shader": "minecraft:post/temporal_data/temporal_data",
+      "fragment_shader": "minecraft:post/temporal_data/temporal_data",
+      "inputs": [
+        {
+          "sampler_name": "Data",
+          "bilinear": false,
+          "target": "minecraft:main",
+          "use_depth_buffer": false
+        }
+      ],
+      "output": "temporal_data",
       "uniforms": {}
     },
     {

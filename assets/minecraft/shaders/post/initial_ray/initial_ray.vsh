@@ -7,6 +7,4 @@ uniform sampler2D DataSampler;
 #define PROJ_MAT_INV
 #define VIEW_MAT
 #define VIEW_MAT_INV
-#define MODEL_OFFSET
 #moj_import <minecraft:templates/fullscreen_with_data.vsh>
-

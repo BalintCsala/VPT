@@ -1,13 +1,20 @@
-#version 400
+#version 420
 
-uniform sampler2D HDRSampler;
+uniform sampler2D DataSampler;
 
-out vec2 texCoord;
+out float exposure;
 
-void main() {
-    vec2 uv = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
-    vec4 pos = vec4(uv * vec2(2, 2) + vec2(-1, -1), 0, 1);
+void extra();
 
-    gl_Position = pos;
-    texCoord = uv;
+#define EXTRA extra
+
+#define SAMPLER_NAME DataSampler
+#define PROJ_MAT
+#define VIEW_MAT
+
+#moj_import <minecraft:templates/fullscreen_with_data.vsh>
+
+void extra() {
+    // TODO: exposure
+    exposure = 0.0;
 }

@@ -15,7 +15,6 @@ void extra();
 #define PROJ_MAT_INV
 #define VIEW_MAT
 #define VIEW_MAT_INV
-#define MODEL_OFFSET
 #define SUN_DIRECTION
 #moj_import <minecraft:templates/fullscreen_with_data.vsh>
 
