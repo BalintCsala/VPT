@@ -4,9 +4,9 @@
 #moj_import <minecraft:utilities/float_storage.glsl>
 #moj_import <minecraft:globals.glsl>
 
-in float exposure;
-in mat4 projMat;
-in mat4 viewMat;
+flat in float exposure;
+flat in mat4 proj;
+flat in mat4 view;
 
 out vec4 fragColor;
 
@@ -28,9 +28,9 @@ void main() {
         fragColor = encodeFloat(exposure);
     } else if (index <= 20) {
         int i = index - 5;
-        fragColor = encodeFloat(projMat[i % 4][i / 4]);
+        fragColor = encodeFloat(proj[i % 4][i / 4]);
     } else if (index <= 36) {
         int i = index - 21;
-        fragColor = encodeFloat(viewMat[i % 4][i / 4]);
+        fragColor = encodeFloat(view[i % 4][i / 4]);
     }
 }

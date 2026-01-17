@@ -19,13 +19,13 @@ uniform sampler2D Material2Sampler;
 uniform sampler2D TranslucentMaterial1Sampler;
 uniform sampler2D TranslucentMaterial2Sampler;
 
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
-in vec3 sunDirection;
-in float sunInfo;
-in vec3 lightIntensity;
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
+flat in vec3 sunDirection;
+flat in float sunInfo;
+flat in vec3 lightIntensity;
 
 in vec2 texCoord;
 
@@ -56,7 +56,7 @@ void main() {
     Material material = decodeScreenMaterial(albedo, material1, material2);
 
     vec4 screenPos = vec4(texCoord, depth, 1.0);
-    vec4 tmp = viewMatInv * projMatInv * (screenPos * 2.0 - 1.0);
+    vec4 tmp = viewInv * projInv * (screenPos * 2.0 - 1.0);
     vec3 playerPos = tmp.xyz / tmp.w;
 
     vec3 hitPos = playerPos - fract(CameraOffset) + material.normal * 0.001;
@@ -72,7 +72,7 @@ void main() {
         if (!sunIntersection.hit) {
             vec3 startPos = playerPos + sunIntersection.t * sunDir;
             vec3 endPos = startPos + sunDir * 32.0;
-            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, viewMat, projMat, projMatInv, 0.1, 12, 0, 0.3, false);
+            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, view, proj, projInv, 0.1, 12, 0, 0.3, false);
             if (!result.hit) {
                 vec3 view = -normalize(playerPos);
                 radiance += brdf(material, material.normal, view, sunDir, NdotL) * lightIntensity * NdotL;

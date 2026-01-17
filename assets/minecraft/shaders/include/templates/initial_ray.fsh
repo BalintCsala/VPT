@@ -12,10 +12,10 @@ uniform sampler2D TranslucentDepthSampler;
 uniform sampler2D AtlasSampler;
 uniform sampler2D ModelDataSampler;
 
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
 
 in vec2 texCoord;
 
@@ -43,8 +43,8 @@ void main() {
         return;
     }
 
-    vec3 fragmentPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, depth)) - fract(CameraOffset);
-    vec3 nearPlanePos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, 0.0)) - fract(CameraOffset);
+    vec3 fragmentPos = screenToPlayer(viewInv, projInv, vec3(texCoord, depth)) - fract(CameraOffset);
+    vec3 nearPlanePos = screenToPlayer(viewInv, projInv, vec3(texCoord, 0.0)) - fract(CameraOffset);
 
     vec3 rayDir = normalize(fragmentPos - nearPlanePos);
     vec3 origin = fragmentPos - rayDir * 0.1;

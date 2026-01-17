@@ -5,9 +5,10 @@
 
 uniform sampler2D DepthSampler;
 
+flat in mat4 projInv;
+flat in mat4 viewInv;
+
 in vec2 texCoord;
-in mat4 projMatInv;
-in mat4 viewMatInv;
 
 out vec4 fragColor;
 
@@ -53,9 +54,9 @@ void main() {
         verticalTexCoord = texCoord + vec2(0.0, 1.0) * pixelSize;
     }
 
-    vec3 centerPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, depthCenter));
-    vec3 horizontalPos = screenToPlayer(viewMatInv, projMatInv, vec3(horizontalTexCoord, horizontalDepth));
-    vec3 verticalPos = screenToPlayer(viewMatInv, projMatInv, vec3(verticalTexCoord, verticalDepth));
+    vec3 centerPos = screenToPlayer(viewInv, projInv, vec3(texCoord, depthCenter));
+    vec3 horizontalPos = screenToPlayer(viewInv, projInv, vec3(horizontalTexCoord, horizontalDepth));
+    vec3 verticalPos = screenToPlayer(viewInv, projInv, vec3(verticalTexCoord, verticalDepth));
     vec3 normal = normalize(cross(horizontalPos - centerPos, verticalPos - centerPos)) * normalSign;
     fragColor = vec4(normal * 0.5 + 0.5, 1.0);
 }

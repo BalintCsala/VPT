@@ -6,19 +6,17 @@
 uniform sampler2D DataSampler;
 uniform sampler2D TemporalSampler;
 
-out vec3 cameraOffset;
-out mat4 prevProjMat;
-out mat4 prevViewMat;
+flat out vec3 cameraOffset;
+flat out mat4 prevProj;
+flat out mat4 prevView;
 
-void extra();
-
-#define EXTRA extra
+#define EXTRA
 
 #define SAMPLER_NAME DataSampler
-#define PROJ_MAT
-#define PROJ_MAT_INV
-#define VIEW_MAT
-#define VIEW_MAT_INV
+#define PROJ
+#define PROJ_INV
+#define VIEW
+#define VIEW_INV
 
 #define SCALE 0.25
 
@@ -26,6 +24,6 @@ void extra();
 
 void extra() {
     cameraOffset = getCameraOffset(TemporalSampler, vec3(CameraBlockPos) - fract(CameraOffset));
-    prevProjMat = getPreviousProj(TemporalSampler);
-    prevViewMat = getPreviousView(TemporalSampler);
+    prevProj = getPreviousProj(TemporalSampler);
+    prevView = getPreviousView(TemporalSampler);
 }

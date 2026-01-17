@@ -2,15 +2,13 @@
 
 uniform sampler2D DataSampler;
 
-out float exposure;
+flat out float exposure;
 
-void extra();
-
-#define EXTRA extra
+#define EXTRA
 
 #define SAMPLER_NAME DataSampler
-#define PROJ_MAT
-#define VIEW_MAT
+#define PROJ
+#define VIEW
 
 #moj_import <minecraft:templates/fullscreen_with_data.vsh>
 

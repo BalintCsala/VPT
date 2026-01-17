@@ -30,13 +30,14 @@ uniform sampler2D Material2Sampler;
 uniform sampler2D TranslucentMaterial1Sampler;
 uniform sampler2D TranslucentMaterial2Sampler;
 
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
-in vec3 sunDirection;
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
+flat in vec3 sunDirection;
+flat in vec3 lightIntensity;
+
 in vec2 texCoord;
-in vec3 lightIntensity;
 
 out vec4 fragColor;
 
@@ -101,8 +102,8 @@ void main() {
     }
 
     vec3 cameraPosition = vec3(CameraBlockPos) - fract(CameraOffset);
-    vec3 fragmentPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, translucentDepth));
-    vec3 solidPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, solidDepth));
+    vec3 fragmentPos = screenToPlayer(viewInv, projInv, vec3(texCoord, translucentDepth));
+    vec3 solidPos = screenToPlayer(viewInv, projInv, vec3(texCoord, solidDepth));
     vec3 worldPos = fragmentPos + cameraPosition;
 
     float effectScaleFactor = log2(length(fragmentPos) + 1.0);
@@ -155,7 +156,7 @@ void main() {
     if (fresnel < 0.8) {
         Ray ray = createRayFromSinglePosition(fragmentPos - fract(CameraOffset), refractedDir);
 
-        vec4 startClipPos = playerToClip(projMat, viewMat, fragmentPos);
+        vec4 startClipPos = playerToClip(proj, view, fragmentPos);
         vec3 startScreenPos = startClipPos.xyz / startClipPos.w * 0.5 + 0.5;
 
         Intersection intersection = raytrace(DepthSampler, DataSampler, ModelDataSampler, AtlasSampler, ray);
@@ -173,7 +174,7 @@ void main() {
         }
 
         vec3 endPos = fragmentPos + refractedDir * dist;
-        vec4 endClipPos = playerToClip(projMat, viewMat, endPos);
+        vec4 endClipPos = playerToClip(proj, view, endPos);
         bool endPosInside = clamp(endClipPos.xyz, -endClipPos.w, endClipPos.w) == endClipPos.xyz;
         vec3 endScreenPos = endClipPos.xyz / endClipPos.w * 0.5 + 0.5;
 
@@ -194,11 +195,11 @@ void main() {
                 if (depth < pos.z) {
                     vec4 baseColor = textureLod(DataSampler, pos.xy * vec2(0.5, 1.0), 0.0);
                     if (abs(baseColor.a - ENTITY_MASK) < 0.5 / 255.0) {
-                        vec3 viewPos = screenToView(projMatInv, vec3(pos.xy, depth));
+                        vec3 viewPos = screenToView(projInv, vec3(pos.xy, depth));
                         viewPos.z -= SSRT_THICKNESS;
-                        vec3 screenPos = viewToScreen(projMat, viewPos);
+                        vec3 screenPos = viewToScreen(proj, viewPos);
                         if (pos.z < screenPos.z) {
-                            endPos = (viewMatInv * vec4(viewPos, 1.0)).xyz;
+                            endPos = (viewInv * vec4(viewPos, 1.0)).xyz;
                             dist = distance(fragmentPos, endPos);
                             foundHit = true;
                             material = decodeScreenMaterial(
@@ -276,7 +277,7 @@ void main() {
         } else {
             vec3 startPos = fragmentPos + reflectedDir * intersection.t;
             vec3 endPos = startPos + reflectedDir * 32.0;
-            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, viewMat, projMat, projMatInv, 8.0, 8, 4, randFloat(randState), false);
+            SSRTResult result = raytraceSSFromPlayer(DepthSampler, startPos, endPos, view, proj, projInv, 8.0, 8, 4, randFloat(randState), false);
             if (result.hit) {
                 radiance += decodeHDR(textureLod(SolidSampler, result.screenPos.xy, 0.0)) * fresnel;
             } else {

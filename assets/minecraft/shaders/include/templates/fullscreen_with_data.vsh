@@ -6,23 +6,25 @@
 #error "You must define SAMPLER_NAME"
 #endif
 
-#ifdef PROJ_MAT
-out mat4 projMat;
+void extra();
+
+#ifdef PROJ
+flat out mat4 proj;
 #endif
-#ifdef PROJ_MAT_INV
-out mat4 projMatInv;
+#ifdef PROJ_INV
+flat out mat4 projInv;
 #endif
-#ifdef VIEW_MAT
-out mat4 viewMat;
+#ifdef VIEW
+flat out mat4 view;
 #endif
-#ifdef VIEW_MAT_INV
-out mat4 viewMatInv;
+#ifdef VIEW_INV
+flat out mat4 viewInv;
 #endif
 #ifdef SUN_DIRECTION
-out vec3 sunDirection;
+flat out vec3 sunDirection;
 #endif
 #ifdef SUN_INFO
-out float sunInfo;
+flat out float sunInfo;
 #endif
 
 out vec2 texCoord;
@@ -35,17 +37,17 @@ const vec2[] OFFSETS = vec2[](
 
 void main() {
     ScreenData screenData = parseScreenData(SAMPLER_NAME);
-    #ifdef PROJ_MAT
-    projMat = screenData.projMat;
+    #ifdef PROJ
+    proj = screenData.proj;
     #endif
-    #ifdef PROJ_MAT_INV
-    projMatInv = screenData.projMatInv;
+    #ifdef PROJ_INV
+    projInv = screenData.projInv;
     #endif
-    #ifdef VIEW_MAT
-    viewMat = screenData.viewMat;
+    #ifdef VIEW
+    view = screenData.view;
     #endif
-    #ifdef VIEW_MAT_INV
-    viewMatInv = screenData.viewMatInv;
+    #ifdef VIEW_INV
+    viewInv = screenData.viewInv;
     #endif
     #ifdef SUN_DIRECTION
     sunDirection = screenData.sunDirection;
@@ -55,7 +57,7 @@ void main() {
     #endif
 
     #ifdef EXTRA
-    EXTRA();
+    extra();
     #endif
 
     vec2 scale = vec2(1.0);

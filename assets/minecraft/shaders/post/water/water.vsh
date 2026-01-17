@@ -4,17 +4,15 @@
 
 uniform sampler2D DataSampler;
 
-out vec3 lightIntensity;
+flat out vec3 lightIntensity;
 
-void extra();
-
-#define EXTRA extra
+#define EXTRA
 
 #define SAMPLER_NAME DataSampler
-#define PROJ_MAT
-#define PROJ_MAT_INV
-#define VIEW_MAT
-#define VIEW_MAT_INV
+#define PROJ
+#define PROJ_INV
+#define VIEW
+#define VIEW_INV
 #define SUN_DIRECTION
 #moj_import <minecraft:templates/fullscreen_with_data.vsh>
 

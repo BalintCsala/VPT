@@ -18,12 +18,12 @@ uniform sampler2D ModelDataSampler;
 uniform sampler2D Material1Sampler;
 uniform sampler2D Material2Sampler;
 
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
-in vec3 sunDirection;
-in vec3 lightIntensity;
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
+flat in vec3 sunDirection;
+flat in vec3 lightIntensity;
 
 in vec2 texCoord;
 
@@ -41,7 +41,7 @@ void main() {
     }
 
     vec3 screenPos = vec3(vec2(parentPixel) / ScreenSize, depth);
-    vec3 playerPos = screenToPlayer(viewMatInv, projMatInv, screenPos);
+    vec3 playerPos = screenToPlayer(viewInv, projInv, screenPos);
 
     vec3 albedo = srgbToLinear(texelFetch(DataSampler, parentPixel / ivec2(2, 1), 0).rgb);
     vec4 material1 = texelFetch(Material1Sampler, parentPixel, 0);

@@ -10,11 +10,11 @@ vec3 GROUND_COLOR = srgbToLinear(vec3(0.19, 0.17, 0.16)) * LIGHT_INTENSITY * 1.0
 
 uniform sampler2D DepthSampler;
 
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
-in vec3 sunDirection;
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
+flat in vec3 sunDirection;
 
 in vec2 texCoord;
 
@@ -25,8 +25,8 @@ void main() {
     vec2 scaledTexCoord = texCoord * vec2(0.5, 1.0);
     float depth = textureLod(DepthSampler, scaledTexCoord, 0.0).r;
 
-    vec3 fragmentPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, depth)) - fract(CameraOffset);
-    vec3 nearPlanePos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, 0.0)) - fract(CameraOffset);
+    vec3 fragmentPos = screenToPlayer(viewInv, projInv, vec3(texCoord, depth)) - fract(CameraOffset);
+    vec3 nearPlanePos = screenToPlayer(viewInv, projInv, vec3(texCoord, 0.0)) - fract(CameraOffset);
 
     vec3 rayDir = normalize(fragmentPos - nearPlanePos);
     vec3 sunDir = normalize(sunDirection);

@@ -49,9 +49,9 @@ vec4 miss(vec2 texCoord, float depth) {
         verticalTexCoord = texCoord + vec2(0.0, 1.0) * pixelSize;
     }
 
-    vec3 centerPos = screenToPlayer(viewMatInv, projMatInv, vec3(texCoord, depthCenter));
-    vec3 horizontalPos = screenToPlayer(viewMatInv, projMatInv, vec3(horizontalTexCoord, horizontalDepth));
-    vec3 verticalPos = screenToPlayer(viewMatInv, projMatInv, vec3(verticalTexCoord, verticalDepth));
+    vec3 centerPos = screenToPlayer(viewInv, projInv, vec3(texCoord, depthCenter));
+    vec3 horizontalPos = screenToPlayer(viewInv, projInv, vec3(horizontalTexCoord, horizontalDepth));
+    vec3 verticalPos = screenToPlayer(viewInv, projInv, vec3(verticalTexCoord, verticalDepth));
     vec3 normal = normalize(cross(horizontalPos - centerPos, verticalPos - centerPos)) * normalSign;
 
     vec2 encoded = octahedronEncode(normal);

@@ -3,10 +3,10 @@
 uniform sampler2D DataSampler;
 
 #define SAMPLER_NAME DataSampler
-#define PROJ_MAT
-#define PROJ_MAT_INV
-#define VIEW_MAT
-#define VIEW_MAT_INV
+#define PROJ
+#define PROJ_INV
+#define VIEW
+#define VIEW_INV
 #define SUN_DIRECTION
 #define SCALE 0.5
 

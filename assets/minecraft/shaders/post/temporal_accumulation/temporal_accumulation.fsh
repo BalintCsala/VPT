@@ -9,14 +9,15 @@ uniform sampler2D PreviousDepthSampler;
 uniform sampler2D CurrentSampler;
 uniform sampler2D PreviousSampler;
 
+flat in mat4 proj;
+flat in mat4 projInv;
+flat in mat4 view;
+flat in mat4 viewInv;
+flat in vec3 cameraOffset;
+flat in mat4 prevProj;
+flat in mat4 prevView;
+
 in vec2 texCoord;
-in mat4 projMat;
-in mat4 projMatInv;
-in mat4 viewMat;
-in mat4 viewMatInv;
-in vec3 cameraOffset;
-in mat4 prevProjMat;
-in mat4 prevViewMat;
 
 out vec4 fragColor;
 
@@ -29,9 +30,9 @@ void main() {
     }
 
     vec3 screenPos = vec3(texCoord, depth);
-    vec3 playerPos = screenToPlayer(viewMatInv, projMatInv, screenPos);
+    vec3 playerPos = screenToPlayer(viewInv, projInv, screenPos);
     vec3 prevPlayerPos = playerPos + cameraOffset;
-    vec4 prevClipPos = prevProjMat * prevViewMat * vec4(prevPlayerPos, 1.0);
+    vec4 prevClipPos = prevProj * prevView * vec4(prevPlayerPos, 1.0);
     if (clamp(prevClipPos.xyz, -prevClipPos.w, prevClipPos.w) != prevClipPos.xyz) {
         fragColor = raw;
         return;
